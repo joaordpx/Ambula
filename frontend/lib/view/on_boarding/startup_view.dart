@@ -10,6 +10,6 @@ class StartupView extends StatefulWidget {
 class StartupViewState extends State<StartupView> {
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return Scaffold(body: Column());
   }
 }
