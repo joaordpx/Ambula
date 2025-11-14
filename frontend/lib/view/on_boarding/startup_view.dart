@@ -10,6 +10,19 @@ class StartupView extends StatefulWidget {
 class StartupViewState extends State<StartupView> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: Column());
+    var media = MediaQuery.of(context).size;
+    return Scaffold(
+      body: Stack(
+        alignment: Alignment.center,
+        children: [
+          Image.asset(
+            "assets/imgs/logo.png",
+            width: media.width,
+            height: media.height,
+            fit: BoxFit.cover,
+          ),
+        ],
+      ),
+    );
   }
 }

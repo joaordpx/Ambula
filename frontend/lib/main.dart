@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/view/on_boarding/StartupView.dart';
+import 'package:frontend/view/on_boarding/startup_view.dart';
 
 void main() {
   runApp(const MainApp());
