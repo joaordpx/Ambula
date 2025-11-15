@@ -12,16 +12,13 @@ class StartupViewState extends State<StartupView> {
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
     return Scaffold(
-      body: Stack(
-        alignment: Alignment.center,
-        children: [
-          Image.asset(
-            "assets/imgs/logo.png",
-            width: media.width,
-            height: media.height,
-            fit: BoxFit.cover,
-          ),
-        ],
+      body: Center(
+        child: Image.asset(
+          "assets/imgs/logo.png",
+          width: media.width * 0.5,
+          height: media.height * 0.8,
+          fit: BoxFit.contain,
+        ),
       ),
     );
   }
