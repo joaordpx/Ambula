@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/common/color_extension.dart';
+import 'package:frontend/view/login/register_view.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class WelcomeView extends StatefulWidget {
-  const WelcomeView({super.key});
+class LoginView extends StatefulWidget {
+  const LoginView({super.key});
 
   @override
-  State<WelcomeView> createState() => _WelcomeViewState();
+  State<LoginView> createState() => _LoginViewState();
 }
 
-class _WelcomeViewState extends State<WelcomeView> {
+class _LoginViewState extends State<LoginView> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
@@ -178,7 +179,12 @@ class _WelcomeViewState extends State<WelcomeView> {
                     ),
                     TextButton(
                       onPressed: () {
-                        //navegação pra tela de cadastro e funcionalidades
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const RegisterView(),
+                          ),
+                        );
                       },
                       style: TextButton.styleFrom(
                         padding: EdgeInsets.zero,

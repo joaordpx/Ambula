@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/view/login/welcome_view.dart';
+import 'package:frontend/view/login/login_view.dart';
 
 class StartupView extends StatefulWidget {
   const StartupView({super.key});
@@ -17,7 +17,7 @@ class StartupViewState extends State<StartupView> {
       if (!mounted) return;
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const WelcomeView()),
+        MaterialPageRoute(builder: (_) => const LoginView()),
       );
     });
   }
