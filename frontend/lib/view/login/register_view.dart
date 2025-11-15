@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/common/color_extension.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:frontend/services/auth_service.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -200,7 +201,56 @@ class _RegisterViewState extends State<RegisterView> {
                   width: 180,
                   height: 44,
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () async {
+                      final name = nameController.text.trim();
+                      final email = emailController.text.trim();
+                      final password = passwordController.text;
+                      final confirmPassword = confirmPasswordController.text;
+
+                      if (name.isEmpty ||
+                          email.isEmpty ||
+                          password.isEmpty ||
+                          confirmPassword.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Preencha todos os campos'),
+                          ),
+                        );
+                        return;
+                      }
+
+                      if (password != confirmPassword) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('As senhas não coincidem'),
+                          ),
+                        );
+                        return;
+                      }
+
+                      try {
+                        final result = await AuthService.register(
+                          name: name,
+                          email: email,
+                          password: password,
+                          passwordConfirmation: confirmPassword,
+                        );
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Conta criada com sucesso!'),
+                          ),
+                        );
+
+                        if (mounted) {
+                          Navigator.pop(context); // volta para a tela de login
+                        }
+                      } catch (e) {
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(SnackBar(content: Text(e.toString())));
+                      }
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: TColor.primary,
                       foregroundColor: Colors.white,

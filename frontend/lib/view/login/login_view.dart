@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/common/color_extension.dart';
 import 'package:frontend/view/login/register_view.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:frontend/services/auth_service.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -147,7 +148,43 @@ class _LoginViewState extends State<LoginView> {
                     width: 160,
                     height: 44,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () async {
+                        final email = emailController.text.trim();
+                        final password = passwordController.text;
+
+                        if (email.isEmpty || password.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Preencha e-mail e senha'),
+                            ),
+                          );
+                          return;
+                        }
+
+                        try {
+                          final result = await AuthService.login(
+                            email: email,
+                            password: password,
+                          );
+
+                          final token = result['token'];
+                          final user = result['user'];
+
+                          // TODO: guardar token em algum lugar (em memória ou storage)
+                          // Por enquanto, só exibe e navega para a home (quando existir)
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Bem-vindo, ${user['name']}!'),
+                            ),
+                          );
+                          // Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HomeView()));
+                        } catch (e) {
+                          ScaffoldMessenger.of(
+                            context,
+                          ).showSnackBar(SnackBar(content: Text(e.toString())));
+                        }
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: TColor.primary,
                         foregroundColor: Colors.white,
