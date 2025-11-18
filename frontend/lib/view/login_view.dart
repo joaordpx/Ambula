@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/common/color_extension.dart';
-import 'package:frontend/view/login/register_view.dart';
+import 'package:frontend/view/register_view.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:frontend/services/auth_service.dart';
 
