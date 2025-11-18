@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Localizacao;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -17,6 +18,10 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('telefone');
+            $table->string('cpf')->unique();
+            $table->foreignIdFor(Localizacao::class)->nullable();
+            $table->tinyInteger('nivel');
             $table->rememberToken();
             $table->timestamps();
         });
