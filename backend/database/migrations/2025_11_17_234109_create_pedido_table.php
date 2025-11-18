@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreignIdFor(User::class);
             $table->foreignIdFor(StatusPedido::class);
             $table->foreignIdFor(Loja::class);
-            $table->boolean('Pagamento');
+            $table->boolean('pagamento');
             $table->timestamps();
         });
     }

@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreignIdFor(Pedido::class);
             $table->foreignIdFor(User::class);
             $table->foreignIdFor(Loja::class);
-            $table->ineteger('nota');
+            $table->integer('nota');
             $table->timestamps();
         });
     }
