@@ -46,4 +46,26 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+
+    public function localizacao()
+    {
+        return $this->belongsTo(Localizacao::class);
+    }
+
+    public function loja()
+    {
+        // se um usuário pode ter várias lojas
+        return $this->hasOne(Loja::class);
+    }
+
+    public function pedidos()
+    {
+        return $this->hasMany(Pedido::class);
+    }
+
+    public function avaliacoes()
+    {
+        return $this->hasMany(Avaliacao::class);
+    }
 }
