@@ -3,10 +3,8 @@ import 'package:frontend/common/color_extension.dart';
 import 'package:frontend/view/register_view.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:frontend/services/auth_service.dart';
-
-// TODO: importe as telas reais quando existirem
-// import 'package:frontend/view/home_comprador_view.dart';
-// import 'package:frontend/view/home_vendedor_view.dart';
+import 'package:frontend/view/home_comprador_view.dart';
+import 'package:frontend/view/home_vendedor_view.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -57,12 +55,10 @@ class _LoginViewState extends State<LoginView> {
       ).showSnackBar(SnackBar(content: Text('Bem-vindo, ${user['name']}!')));
 
       if (loja == null) {
-        // Não tem loja ainda -> entra como comprador direto
-        // TODO: substituir pelas suas telas reais
-        // Navigator.pushReplacement(
-        //   context,
-        //   MaterialPageRoute(builder: (_) => const HomeCompradorView()),
-        // );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const HomeCompradorView()),
+        );
       } else {
         // Tem loja -> perguntar se quer entrar como comprador ou vendedor
         await _showRoleChoiceDialog(user);
@@ -95,12 +91,11 @@ class _LoginViewState extends State<LoginView> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // fecha o diálogo
-                // TODO: navegar para home de comprador
-                // Navigator.pushReplacement(
-                //   context,
-                //   MaterialPageRoute(builder: (_) => const HomeCompradorView()),
-                // );
+                Navigator.of(context).pop();
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => const HomeCompradorView()),
+                );
               },
               child: Text(
                 'Comprador',
@@ -110,11 +105,10 @@ class _LoginViewState extends State<LoginView> {
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                // TODO: navegar para home de vendedor
-                // Navigator.pushReplacement(
-                //   context,
-                //   MaterialPageRoute(builder: (_) => const HomeVendedorView()),
-                // );
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => const HomeVendedorView()),
+                );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: TColor.primary,
