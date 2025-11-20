@@ -22,7 +22,12 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'telefone',
+        'cpf',
+        'localizacao_id',
+        'nivel',
     ];
+
 
     /**
      * The attributes that should be hidden for serialization.
@@ -55,7 +60,6 @@ class User extends Authenticatable
 
     public function loja()
     {
-        // se um usuário pode ter várias lojas
         return $this->hasOne(Loja::class);
     }
 
@@ -67,5 +71,11 @@ class User extends Authenticatable
     public function avaliacoes()
     {
         return $this->hasMany(Avaliacao::class);
+    }
+
+    protected $appends = ['is_vendedor'];
+
+    public function getIsVendedorAttribute() : bool {
+        return $this->loja()->exists();
     }
 }

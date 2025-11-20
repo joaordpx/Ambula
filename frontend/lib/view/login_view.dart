@@ -4,6 +4,10 @@ import 'package:frontend/view/register_view.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:frontend/services/auth_service.dart';
 
+// TODO: importe as telas reais quando existirem
+// import 'package:frontend/view/home_comprador_view.dart';
+// import 'package:frontend/view/home_vendedor_view.dart';
+
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
 
@@ -15,6 +19,118 @@ class _LoginViewState extends State<LoginView> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
+  bool _isLoading = false;
+  bool _obscurePassword = true;
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleLogin() async {
+    final email = emailController.text.trim();
+    final password = passwordController.text;
+
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Preencha e-mail e senha')));
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final result = await AuthService.login(email: email, password: password);
+
+      final token = result['token'];
+      final user = result['user'] as Map<String, dynamic>;
+      final loja = user['loja'];
+
+      // TODO: guardar token e dados do usuário (ex: SharedPreferences / provider)
+      // Ex: await SessionManager.saveUser(user, token);
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Bem-vindo, ${user['name']}!')));
+
+      if (loja == null) {
+        // Não tem loja ainda -> entra como comprador direto
+        // TODO: substituir pelas suas telas reais
+        // Navigator.pushReplacement(
+        //   context,
+        //   MaterialPageRoute(builder: (_) => const HomeCompradorView()),
+        // );
+      } else {
+        // Tem loja -> perguntar se quer entrar como comprador ou vendedor
+        await _showRoleChoiceDialog(user);
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  Future<void> _showRoleChoiceDialog(Map<String, dynamic> user) async {
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(
+            'Como você quer entrar?',
+            style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+          ),
+          content: Text(
+            'Você possui uma loja cadastrada. '
+            'Escolha se deseja usar o app como comprador ou vendedor.',
+            style: GoogleFonts.inter(fontSize: 14),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // fecha o diálogo
+                // TODO: navegar para home de comprador
+                // Navigator.pushReplacement(
+                //   context,
+                //   MaterialPageRoute(builder: (_) => const HomeCompradorView()),
+                // );
+              },
+              child: Text(
+                'Comprador',
+                style: GoogleFonts.inter(color: TColor.primary),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                // TODO: navegar para home de vendedor
+                // Navigator.pushReplacement(
+                //   context,
+                //   MaterialPageRoute(builder: (_) => const HomeVendedorView()),
+                // );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: TColor.primary,
+                foregroundColor: Colors.white,
+              ),
+              child: Text(
+                'Vendedor',
+                style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final media = MediaQuery.of(context).size;
@@ -23,7 +139,7 @@ class _LoginViewState extends State<LoginView> {
       backgroundColor: TColor.background,
       body: SafeArea(
         child: Center(
-          child: Padding(
+          child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -99,7 +215,7 @@ class _LoginViewState extends State<LoginView> {
                 const SizedBox(height: 4),
                 TextField(
                   controller: passwordController,
-                  obscureText: true,
+                  obscureText: _obscurePassword,
                   decoration: InputDecoration(
                     hintText: "Digite sua senha",
                     filled: true,
@@ -112,6 +228,19 @@ class _LoginViewState extends State<LoginView> {
                       borderRadius: BorderRadius.circular(14),
                       borderSide: BorderSide.none,
                     ),
+                    suffixIcon: IconButton(
+                      onPressed: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
+                      icon: Icon(
+                        _obscurePassword
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                        size: 20,
+                      ),
+                    ),
                   ),
                 ),
 
@@ -122,7 +251,7 @@ class _LoginViewState extends State<LoginView> {
                   alignment: Alignment.centerRight,
                   child: TextButton(
                     onPressed: () {
-                      //navegação pra tela de cadastro e funcionalidades
+                      // TODO: implementar fluxo de recuperação de senha (quando existir)
                     },
                     style: TextButton.styleFrom(
                       padding: EdgeInsets.zero,
@@ -148,43 +277,7 @@ class _LoginViewState extends State<LoginView> {
                     width: 160,
                     height: 44,
                     child: ElevatedButton(
-                      onPressed: () async {
-                        final email = emailController.text.trim();
-                        final password = passwordController.text;
-
-                        if (email.isEmpty || password.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Preencha e-mail e senha'),
-                            ),
-                          );
-                          return;
-                        }
-
-                        try {
-                          final result = await AuthService.login(
-                            email: email,
-                            password: password,
-                          );
-
-                          final token = result['token'];
-                          final user = result['user'];
-
-                          // TODO: guardar token em algum lugar (em memória ou storage)
-                          // Por enquanto, só exibe e navega para a home (quando existir)
-
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Bem-vindo, ${user['name']}!'),
-                            ),
-                          );
-                          // Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HomeView()));
-                        } catch (e) {
-                          ScaffoldMessenger.of(
-                            context,
-                          ).showSnackBar(SnackBar(content: Text(e.toString())));
-                        }
-                      },
+                      onPressed: _isLoading ? null : _handleLogin,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: TColor.primary,
                         foregroundColor: Colors.white,
@@ -196,7 +289,18 @@ class _LoginViewState extends State<LoginView> {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      child: const Text("Entrar"),
+                      child: _isLoading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
+                              ),
+                            )
+                          : const Text("Entrar"),
                     ),
                   ),
                 ),
