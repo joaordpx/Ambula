@@ -3,8 +3,8 @@ import 'package:frontend/common/color_extension.dart';
 import 'package:frontend/view/register_view.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:frontend/services/auth_service.dart';
-import 'package:frontend/view/home_comprador_view.dart';
 import 'package:frontend/view/home_vendedor_view.dart';
+import 'package:frontend/view/main_tab_view.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -47,8 +47,7 @@ class _LoginViewState extends State<LoginView> {
       final user = result['user'] as Map<String, dynamic>;
       final loja = user['loja'];
 
-      // TODO: guardar token e dados do usuário (ex: SharedPreferences / provider)
-      // Ex: await SessionManager.saveUser(user, token);
+      AuthService.setToken(token); // grava o token em memória
 
       ScaffoldMessenger.of(
         context,
@@ -57,7 +56,7 @@ class _LoginViewState extends State<LoginView> {
       if (loja == null) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => const HomeCompradorView()),
+          MaterialPageRoute(builder: (_) => const MainTabView()),
         );
       } else {
         // Tem loja -> perguntar se quer entrar como comprador ou vendedor
@@ -94,7 +93,7 @@ class _LoginViewState extends State<LoginView> {
                 Navigator.of(context).pop();
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (_) => const HomeCompradorView()),
+                  MaterialPageRoute(builder: (_) => const MainTabView()),
                 );
               },
               child: Text(
