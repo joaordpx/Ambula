@@ -3,18 +3,23 @@ import 'package:http/http.dart' as http;
 
 class AuthService {
   static const String _baseUrl = 'http://localhost/Ambula/backend/public/api';
+  // se usando php embutido (php -S 127.0.0.1:9000 -t public),
+  // trocar linha acima por:
+  // static const String _baseUrl = 'http://127.0.0.1:9000/api';
 
   static Future<Map<String, dynamic>> register({
     required String name,
     required String email,
     required String password,
-    required String passwordConfirmation,
+    required String telefone,
+    required String cpf,
+    required int nivel,
   }) async {
     final url = Uri.parse('$_baseUrl/register');
 
     final response = await http.post(
       url,
-      headers: {
+      headers: const {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
@@ -22,13 +27,15 @@ class AuthService {
         'name': name,
         'email': email,
         'password': password,
-        'password_confirmation': passwordConfirmation,
+        'telefone': telefone,
+        'cpf': cpf,
+        'nivel': nivel,
       }),
     );
 
     if (response.statusCode == 200 || response.statusCode == 201) {
       final data = jsonDecode(response.body) as Map<String, dynamic>;
-      return data; // contém 'user' e 'token'
+      return data;
     } else {
       try {
         final body = jsonDecode(response.body);
@@ -51,7 +58,7 @@ class AuthService {
 
     final response = await http.post(
       url,
-      headers: {
+      headers: const {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
@@ -60,7 +67,7 @@ class AuthService {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body) as Map<String, dynamic>;
-      return data; // 'user' e 'token'
+      return data;
     } else {
       try {
         final body = jsonDecode(response.body);

@@ -10,23 +10,29 @@ use Illuminate\Support\Facades\Hash;
 class AuthController extends Controller
 {
     // registro de usuario
-    public function register(Request $request){
+    public function register(Request $request) {
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:6', 'confirmed'],
+            'name'     => ['required', 'string', 'max:255'],
+            'email'    => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:6'],
+            'telefone' => ['required', 'string', 'max:20'],
+            'cpf'      => ['required', 'string', 'max:14', 'unique:users,cpf'],
+            'nivel'    => ['required', 'integer', 'in:0,1'],
         ]);
 
-        $user = User::create ([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
+        $user = User::create([
+            'name'     => $validated['name'],
+            'email'    => $validated['email'],
             'password' => Hash::make($validated['password']),
+            'telefone' => $validated['telefone'],
+            'cpf'      => $validated['cpf'],
+            'nivel'    => $validated['nivel'],
         ]);
 
         $token = $user->createToken('api-token')->plainTextToken;
 
-        return response ()-> json([
-            'user' => $user,
+        return response()->json([
+            'user'  => $user,
             'token' => $token,
         ], 201);
     }
@@ -46,6 +52,8 @@ class AuthController extends Controller
         }
 
         $user = Auth::user();
+
+        $user->load('loja');
 
         $token = $user->createToken('api-token')->plainTextToken;
 
