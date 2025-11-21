@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class AuthService {
-  static const String _baseUrl = 'http://10.0.2.2:8000/api';
-  //static const String _baseUrl = 'http://localhost/Ambula/backend/public/api';
+  // static const String _baseUrl = 'http://10.0.2.2:8000/api';
+  static const String _baseUrl = 'http://localhost/Ambula/backend/public/api';
   // se usando php embutido (php -S 127.0.0.1:9000 -t public),
   // trocar linha acima por:
   // static const String _baseUrl = 'http://127.0.0.1:9000/api';
