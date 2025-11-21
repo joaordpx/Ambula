@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Loja extends Model
 {
@@ -21,28 +22,22 @@ class Loja extends Model
         'user_id',
     ];
 
-    public function user()
+    protected $casts = [
+        'status' => 'boolean',
+        'avaliacao' => 'float',
+    ];
+
+    
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class);
     }
 
-    public function localizacao()
+    
+    public function localizacao(): BelongsTo
     {
         return $this->belongsTo(Localizacao::class);
     }
-
-    public function pedidos()
-    {
-        return $this->hasMany(Pedido::class);
-    }
-
-    public function estoques()
-    {
-        return $this->hasMany(Estoque::class);
-    }
-
-    public function avaliacoes()
-    {
-        return $this->hasMany(Avaliacao::class);
-    }
+    
+    
 }

@@ -7,16 +7,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
      *
-     * @var list<string>
+     * Adicionamos 'telefone', 'cpf', 'localizacao_id' e 'nivel'
      */
     protected $fillable = [
         'name',
@@ -28,11 +28,10 @@ class User extends Authenticatable
         'nivel',
     ];
 
-
     /**
      * The attributes that should be hidden for serialization.
      *
-     * @var list<string>
+     * @var array<int, string>
      */
     protected $hidden = [
         'password',
@@ -40,42 +39,20 @@ class User extends Authenticatable
     ];
 
     /**
-     * Get the attributes that should be cast.
+     * The attributes that should be cast.
      *
-     * @return array<string, string>
+     * @var array<string, string>
      */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+    ];
 
-
-    public function localizacao()
+    /**
+     * Relacionamento com a Localizacao.
+     */
+    public function localizacao(): BelongsTo
     {
         return $this->belongsTo(Localizacao::class);
-    }
-
-    public function loja()
-    {
-        return $this->hasOne(Loja::class);
-    }
-
-    public function pedidos()
-    {
-        return $this->hasMany(Pedido::class);
-    }
-
-    public function avaliacoes()
-    {
-        return $this->hasMany(Avaliacao::class);
-    }
-
-    protected $appends = ['is_vendedor'];
-
-    public function getIsVendedorAttribute() : bool {
-        return $this->loja()->exists();
     }
 }

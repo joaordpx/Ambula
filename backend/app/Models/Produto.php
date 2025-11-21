@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Produto extends Model
 {
@@ -19,18 +20,13 @@ class Produto extends Model
         'categoria_produto_id',
     ];
 
-    public function categoria()
+    protected $casts = [
+        'valor' => 'decimal:2',
+    ];
+
+    
+    public function categoria(): BelongsTo
     {
         return $this->belongsTo(CategoriaProduto::class, 'categoria_produto_id');
-    }
-
-    public function estoques()
-    {
-        return $this->hasMany(Estoque::class);
-    }
-
-    public function itens()
-    {
-        return $this->hasMany(ItensPedido::class, 'produto_id');
     }
 }
