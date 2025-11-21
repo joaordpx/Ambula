@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('categoria_produto', function (Blueprint $table) {
             $table->id();
             $table->string('descricao');
+            $table->string('imagem')->nullable();
             $table->timestamps();
         });
     }
