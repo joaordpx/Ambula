@@ -3,6 +3,7 @@ import 'package:frontend/common/color_extension.dart';
 import 'package:frontend/models/search_models.dart';
 import 'package:frontend/services/search_discovery_service.dart';
 import 'package:frontend/services/search_service.dart';
+import 'package:frontend/view/store_detail_view.dart';
 
 class SearchView extends StatefulWidget {
   const SearchView({super.key});
@@ -250,87 +251,89 @@ class _SearchViewState extends State<SearchView> {
   }
 
   Widget _construirCardLoja(Loja loja) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          //imagem loja
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Container(
-              width: 82,
-              height: 82,
-              color: Colors.grey.shade300,
-              child: loja.imagem != null
-                  ? Image.network(loja.imagem!, fit: BoxFit.cover)
-                  : const Icon(Icons.store),
+    return InkWell(
+      borderRadius: BorderRadius.circular(8),
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => StoreDetailView(lojaId: loja.id)),
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // imagem loja
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                width: 82,
+                height: 82,
+                color: Colors.grey.shade300,
+                child: loja.imagem != null
+                    ? Image.network(loja.imagem!, fit: BoxFit.cover)
+                    : const Icon(Icons.store),
+              ),
             ),
-          ),
-          const SizedBox(width: 12),
+            const SizedBox(width: 12),
 
-          //texto (nome, status, descrição) + avaliação à direita
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        loja.nome,
-                        style: TextStyle(
-                          color: TColor.primarytext,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Row(
-                      children: [
-                        Text(
-                          loja.avaliacao.toStringAsFixed(1),
+            // texto (nome, status, descrição) + avaliação à direita
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          loja.nome,
                           style: TextStyle(
                             color: TColor.primarytext,
-                            fontSize: 13,
+                            fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(width: 2),
-                        const Icon(Icons.star, size: 14, color: Colors.amber),
-                      ],
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 2),
-
-                //status verde
-                Text(
-                  loja.status,
-                  style: const TextStyle(
-                    color: Colors.green,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
+                      ),
+                      const SizedBox(width: 8),
+                      Row(
+                        children: [
+                          Text(
+                            loja.avaliacao.toStringAsFixed(1),
+                            style: TextStyle(
+                              color: TColor.primarytext,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(width: 2),
+                          const Icon(Icons.star, size: 14, color: Colors.amber),
+                        ],
+                      ),
+                    ],
                   ),
-                ),
-
-                const SizedBox(height: 4),
-
-                //descrição...
-                Text(
-                  loja.descricao,
-                  style: TextStyle(color: TColor.secondarytext, fontSize: 13),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+                  const SizedBox(height: 2),
+                  Text(
+                    loja.status,
+                    style: const TextStyle(
+                      color: Colors.green,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    loja.descricao,
+                    style: TextStyle(color: TColor.secondarytext, fontSize: 13),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
