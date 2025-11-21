@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class AuthService {
+  // static const String _baseUrl = 'http://10.0.2.2:8000/api';
   static const String _baseUrl = 'http://localhost/Ambula/backend/public/api';
   // se usando php embutido (php -S 127.0.0.1:9000 -t public),
   // trocar linha acima por:
@@ -16,7 +17,6 @@ class AuthService {
   static String? get token => _token;
 
   // registro
-
   static Future<Map<String, dynamic>> register({
     required String name,
     required String email,
@@ -42,6 +42,10 @@ class AuthService {
         'nivel': nivel,
       }),
     );
+
+    // 🔍 logs pra ver o que o back está respondendo
+    print('REGISTER STATUS: ${response.statusCode}');
+    print('REGISTER BODY: ${response.body}');
 
     if (response.statusCode == 200 || response.statusCode == 201) {
       final data = jsonDecode(response.body) as Map<String, dynamic>;
@@ -96,9 +100,7 @@ class AuthService {
     }
   }
 
-  // me - busca dados do usuário autenticado em GET /api/me e
-  // usa o token guardado em [_token] pra retornar o map com os dados do usuário
-
+  // me - busca dados do usuário autenticado em GET /api/me
   static Future<Map<String, dynamic>> getMe() async {
     if (_token == null) {
       throw Exception('Usuário não autenticado (token ausente).');
