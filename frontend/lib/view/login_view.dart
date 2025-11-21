@@ -160,7 +160,7 @@ class _LoginViewState extends State<LoginView> {
 
                 const SizedBox(height: 32),
 
-                // EMAIL
+                // email
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
@@ -193,7 +193,7 @@ class _LoginViewState extends State<LoginView> {
 
                 const SizedBox(height: 20),
 
-                // SENHA
+                // senha
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
@@ -239,7 +239,7 @@ class _LoginViewState extends State<LoginView> {
 
                 const SizedBox(height: 8),
 
-                // ESQUECI A SENHA
+                // esqueci a senha
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
@@ -264,7 +264,7 @@ class _LoginViewState extends State<LoginView> {
 
                 const SizedBox(height: 16),
 
-                // BOTÃO ENTRAR
+                // entrar btn
                 Center(
                   child: SizedBox(
                     width: 160,
@@ -300,7 +300,7 @@ class _LoginViewState extends State<LoginView> {
 
                 const SizedBox(height: 24),
 
-                // REGISTRO
+                // registro
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

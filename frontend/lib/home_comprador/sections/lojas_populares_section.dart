@@ -1,22 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/common/color_extension.dart';
-import 'package:frontend/models/categoria_produto.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class CategoriasSection extends StatelessWidget {
-  final List<CategoriaProduto> categorias;
-  final VoidCallback?
-  onVerMais; // callback pro "Ver mais" (pode ser null por enquanto)
+class LojasPopularesSection extends StatelessWidget {
+  final List<Map<String, dynamic>> lojas;
+  final VoidCallback? onVerMais;
 
-  const CategoriasSection({
-    super.key,
-    required this.categorias,
-    this.onVerMais,
-  });
+  const LojasPopularesSection({super.key, required this.lojas, this.onVerMais});
 
   @override
   Widget build(BuildContext context) {
-    if (categorias.isEmpty) {
+    if (lojas.isEmpty) {
       return const SizedBox.shrink();
     }
 
@@ -25,11 +19,12 @@ class CategoriasSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Título + "Ver mais"
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "Categorias de Produtos",
+                "Lojas Mais Populares",
                 style: GoogleFonts.inter(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
@@ -50,40 +45,44 @@ class CategoriasSection extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
+
           SizedBox(
-            height: 90,
+            height: 110,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
-              itemCount: categorias.length,
+              itemCount: lojas.length,
               separatorBuilder: (_, __) => const SizedBox(width: 16),
-              itemBuilder: (context, i) {
-                final cat = categorias[i];
-                final letra = cat.descricao.characters.first;
+              itemBuilder: (context, index) {
+                final loja = lojas[index];
+                final nome = (loja['nome'] ?? '').toString().trim();
+                final inicial = (nome.isNotEmpty ? nome.characters.first : '?')
+                    .toUpperCase();
 
                 return Column(
                   children: [
+                    // avatar circular da loja (placeholder, depois vira imagem)
                     Container(
-                      width: 56,
-                      height: 56,
+                      width: 64,
+                      height: 64,
                       decoration: BoxDecoration(
-                        color: TColor.primary.withOpacity(0.12),
                         shape: BoxShape.circle,
+                        color: TColor.primary.withOpacity(0.15),
                       ),
                       alignment: Alignment.center,
                       child: Text(
-                        letra.toUpperCase(),
+                        inicial,
                         style: GoogleFonts.inter(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
+                          fontSize: 24,
+                          fontWeight: FontWeight.w700,
                           color: TColor.primary,
                         ),
                       ),
                     ),
                     const SizedBox(height: 6),
                     SizedBox(
-                      width: 73,
+                      width: 80,
                       child: Text(
-                        cat.descricao,
+                        nome.isEmpty ? 'Nome da Loja' : nome,
                         textAlign: TextAlign.center,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,

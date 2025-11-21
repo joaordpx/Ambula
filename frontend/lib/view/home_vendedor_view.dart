@@ -69,7 +69,6 @@ class HomeVendedorView extends StatelessWidget {
 
             const Divider(height: 1),
 
-            // CORPO – estatísticas e atalhos (placeholder)
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(
@@ -79,7 +78,6 @@ class HomeVendedorView extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Resumo de hoje
                     Text(
                       "Resumo de hoje",
                       style: GoogleFonts.inter(
@@ -106,8 +104,6 @@ class HomeVendedorView extends StatelessWidget {
                     ),
 
                     const SizedBox(height: 24),
-
-                    // Atalhos principais
                     Text(
                       "Atalhos rápidos",
                       style: GoogleFonts.inter(
@@ -140,7 +136,6 @@ class HomeVendedorView extends StatelessWidget {
 
                     const SizedBox(height: 24),
 
-                    // Placeholder final
                     Center(
                       child: Text(
                         "Tela do vendedor em construção.\n\n"
@@ -160,7 +155,6 @@ class HomeVendedorView extends StatelessWidget {
               ),
             ),
 
-            // Bottom bar (placeholder)
             Container(
               width: media.width,
               height: 64,

@@ -7,18 +7,15 @@ class AuthService {
   // trocar linha acima por:
   // static const String _baseUrl = 'http://127.0.0.1:9000/api';
 
-  /// Token atual em memória (preenchido após login bem-sucedido)
   static String? _token;
 
-  /// Define o token manualmente, caso você queira.
   static void setToken(String token) {
     _token = token;
   }
 
-  /// Lê o token atual (pode ser null se não logado).
   static String? get token => _token;
 
-  // ================= REGISTER =================
+  // registro
 
   static Future<Map<String, dynamic>> register({
     required String name,
@@ -62,11 +59,7 @@ class AuthService {
     }
   }
 
-  // ================= LOGIN =================
-
-  /// Faz login na API: POST /api/login
-  /// Espera que a API retorne algo como:
-  /// { "user": { ... }, "token": "..." }
+  // login
   static Future<Map<String, dynamic>> login({
     required String email,
     required String password,
@@ -103,12 +96,9 @@ class AuthService {
     }
   }
 
-  // ================= ME =================
+  // me - busca dados do usuário autenticado em GET /api/me e
+  // usa o token guardado em [_token] pra retornar o map com os dados do usuário
 
-  /// Busca os dados do usuário autenticado em GET /api/me
-  /// Usa o token guardado em [_token].
-  ///
-  /// Retorna o Map com os dados do usuário.
   static Future<Map<String, dynamic>> getMe() async {
     if (_token == null) {
       throw Exception('Usuário não autenticado (token ausente).');

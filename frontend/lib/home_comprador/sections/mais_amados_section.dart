@@ -6,11 +6,7 @@ class MaisAmadosSection extends StatelessWidget {
   final List<Map<String, dynamic>> produtos;
   final VoidCallback? onVerMais;
 
-  const MaisAmadosSection({
-    super.key,
-    required this.produtos,
-    this.onVerMais,
-  });
+  const MaisAmadosSection({super.key, required this.produtos, this.onVerMais});
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +47,7 @@ class MaisAmadosSection extends StatelessWidget {
           const SizedBox(height: 12),
 
           SizedBox(
-            height: 220, // espaço pra card completo
+            height: 220,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: produtos.length,
@@ -59,10 +55,12 @@ class MaisAmadosSection extends StatelessWidget {
               itemBuilder: (context, index) {
                 final item = produtos[index];
 
-                final nomeProduto =
-                    (item['nomeProduto'] ?? '').toString().trim();
-                final nomeAmbulante =
-                    (item['nomeAmbulante'] ?? '').toString().trim();
+                final nomeProduto = (item['nomeProduto'] ?? '')
+                    .toString()
+                    .trim();
+                final nomeAmbulante = (item['nomeAmbulante'] ?? '')
+                    .toString()
+                    .trim();
                 final lojaAberta = item['lojaAberta'] == true;
 
                 return _MaisAmadoCard(
@@ -102,15 +100,9 @@ class _MaisAmadoCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             child: Container(
               height: 120,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-              ),
+              decoration: BoxDecoration(color: Colors.grey[300]),
               child: const Center(
-                child: Icon(
-                  Icons.fastfood,
-                  size: 40,
-                  color: Colors.white70,
-                ),
+                child: Icon(Icons.fastfood, size: 40, color: Colors.white70),
               ),
             ),
           ),
@@ -129,7 +121,7 @@ class _MaisAmadoCard extends StatelessWidget {
           ),
           const SizedBox(height: 6),
 
-          // ambulante + avatarzinho
+          // ambulante + avatar
           Row(
             children: [
               CircleAvatar(

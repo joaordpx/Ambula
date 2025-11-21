@@ -7,7 +7,6 @@ class CategoriaProdutoService {
   ///
   /// Por enquanto, estamos usando uma lista mockada.
   static Future<List<CategoriaProduto>> fetchCategorias() async {
-    // Simula um pequeno atraso de rede
     await Future.delayed(const Duration(milliseconds: 500));
 
     // TODO: substituir pelos dados vindos do backend
