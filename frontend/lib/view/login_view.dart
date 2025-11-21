@@ -3,10 +3,8 @@ import 'package:frontend/common/color_extension.dart';
 import 'package:frontend/view/register_view.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:frontend/services/auth_service.dart';
-
-// TODO: importe as telas reais quando existirem
-// import 'package:frontend/view/home_comprador_view.dart';
-// import 'package:frontend/view/home_vendedor_view.dart';
+import 'package:frontend/view/home_vendedor_view.dart';
+import 'package:frontend/view/main_tab_view.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -49,20 +47,17 @@ class _LoginViewState extends State<LoginView> {
       final user = result['user'] as Map<String, dynamic>;
       final loja = user['loja'];
 
-      // TODO: guardar token e dados do usuário (ex: SharedPreferences / provider)
-      // Ex: await SessionManager.saveUser(user, token);
+      AuthService.setToken(token); // grava o token em memória
 
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Bem-vindo, ${user['name']}!')));
 
       if (loja == null) {
-        // Não tem loja ainda -> entra como comprador direto
-        // TODO: substituir pelas suas telas reais
-        // Navigator.pushReplacement(
-        //   context,
-        //   MaterialPageRoute(builder: (_) => const HomeCompradorView()),
-        // );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const MainTabView()),
+        );
       } else {
         // Tem loja -> perguntar se quer entrar como comprador ou vendedor
         await _showRoleChoiceDialog(user);
@@ -95,12 +90,11 @@ class _LoginViewState extends State<LoginView> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // fecha o diálogo
-                // TODO: navegar para home de comprador
-                // Navigator.pushReplacement(
-                //   context,
-                //   MaterialPageRoute(builder: (_) => const HomeCompradorView()),
-                // );
+                Navigator.of(context).pop();
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => const MainTabView()),
+                );
               },
               child: Text(
                 'Comprador',
@@ -110,11 +104,10 @@ class _LoginViewState extends State<LoginView> {
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                // TODO: navegar para home de vendedor
-                // Navigator.pushReplacement(
-                //   context,
-                //   MaterialPageRoute(builder: (_) => const HomeVendedorView()),
-                // );
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => const HomeVendedorView()),
+                );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: TColor.primary,
@@ -167,7 +160,7 @@ class _LoginViewState extends State<LoginView> {
 
                 const SizedBox(height: 32),
 
-                // EMAIL
+                // email
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
@@ -200,7 +193,7 @@ class _LoginViewState extends State<LoginView> {
 
                 const SizedBox(height: 20),
 
-                // SENHA
+                // senha
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
@@ -246,7 +239,7 @@ class _LoginViewState extends State<LoginView> {
 
                 const SizedBox(height: 8),
 
-                // ESQUECI A SENHA
+                // esqueci a senha
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
@@ -271,7 +264,7 @@ class _LoginViewState extends State<LoginView> {
 
                 const SizedBox(height: 16),
 
-                // BOTÃO ENTRAR
+                // entrar btn
                 Center(
                   child: SizedBox(
                     width: 160,
@@ -307,7 +300,7 @@ class _LoginViewState extends State<LoginView> {
 
                 const SizedBox(height: 24),
 
-                // REGISTRO
+                // registro
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
