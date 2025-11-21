@@ -43,10 +43,6 @@ class CategoriaProdutoController extends Controller
 
         return response()->json($categoria);
     }
-
-    /**
-     * PUT/PATCH /api/categorias/{id} - Atualiza uma categoria.
-     */
     public function update(Request $request, string $id)
     {
         $categoria = CategoriaProduto::find($id);

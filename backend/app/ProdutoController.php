@@ -14,7 +14,6 @@ class ProdutoController extends Controller
      */
     public function index()
     {
-        // Carrega a categoria para exibir junto com o produto
         return response()->json(Produto::with('categoria')->get());
     }
 
@@ -24,7 +23,7 @@ class ProdutoController extends Controller
     public function store(Request $request)
     {
         try {
-            // 1. Validação dos dados de entrada
+            
             $request->validate([
                 'nome' => 'required|string|max:255',
                 'valor' => 'required|numeric|min:0.01',
@@ -36,14 +35,13 @@ class ProdutoController extends Controller
             $data = $request->except('imagem');
             $data['imagem'] = null;
 
-            // 2. Upload da Imagem (se existir)
+            
             if ($request->hasFile('imagem')) {
-                // Salva a imagem no disco 'public' (config/filesystems.php)
+                
                 $path = $request->file('imagem')->store('produtos', 'public');
                 $data['imagem'] = $path;
             }
 
-            // 3. Criação do Produto
             $produto = Produto::create($data);
 
             return response()->json([
@@ -84,7 +82,6 @@ class ProdutoController extends Controller
         }
 
         try {
-            // 1. Validação dos dados de entrada
             $request->validate([
                 'nome' => 'required|string|max:255',
                 'valor' => 'required|numeric|min:0.01',
@@ -95,18 +92,17 @@ class ProdutoController extends Controller
 
             $data = $request->except('imagem');
 
-            // 2. Upload e Atualização da Imagem (se existir)
             if ($request->hasFile('imagem')) {
-                // Deleta a imagem antiga, se existir
+                
                 if ($produto->imagem) {
                     Storage::disk('public')->delete($produto->imagem);
                 }
-                // Salva a nova imagem
+                
                 $path = $request->file('imagem')->store('produtos', 'public');
                 $data['imagem'] = $path;
             }
 
-            // 3. Atualização do Produto
+            
             $produto->update($data);
 
             return response()->json([
@@ -121,9 +117,6 @@ class ProdutoController extends Controller
         }
     }
 
-    /**
-     * DELETE /api/produtos/{id} - Remove um produto.
-     */
     public function destroy(string $id)
     {
         $produto = Produto::find($id);
@@ -132,7 +125,7 @@ class ProdutoController extends Controller
             return response()->json(['message' => 'Produto não encontrado.'], 404);
         }
 
-        // Deleta a imagem associada, se existir
+        
         if ($produto->imagem) {
             Storage::disk('public')->delete($produto->imagem);
         }

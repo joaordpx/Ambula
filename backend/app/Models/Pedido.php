@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Pedido extends Model
 {
@@ -22,29 +24,24 @@ class Pedido extends Model
         'pagamento' => 'boolean',
     ];
 
-    public function user()
+    
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class);
     }
 
-    public function loja()
-    {
-        return $this->belongsTo(Loja::class);
-    }
-
-    public function status()
+    public function status(): BelongsTo
     {
         return $this->belongsTo(StatusPedido::class, 'status_pedido_id');
     }
 
-    public function itens()
+    public function loja(): BelongsTo
     {
-        return $this->hasMany(ItensPedido::class);
+        return $this->belongsTo(Loja::class);
     }
 
-    public function avaliacao()
+    public function itens(): HasMany
     {
-        // normalmente um pedido tem no máximo 1 avaliação
-        return $this->hasOne(Avaliacao::class);
+        return $this->hasMany(ItensPedido::class);
     }
 }

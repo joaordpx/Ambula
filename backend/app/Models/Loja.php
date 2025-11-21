@@ -33,11 +33,10 @@ class Loja extends Model
         return $this->belongsTo(User::class);
     }
 
-    
     public function localizacao(): BelongsTo
     {
         return $this->belongsTo(Localizacao::class);
     }
     
-    
+
 }
