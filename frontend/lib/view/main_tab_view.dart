@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/common/color_extension.dart';
 import 'package:frontend/common_widget/ambula_bottom_nav_bar.dart';
 import 'package:frontend/home_comprador/home_comprador_view.dart';
+import 'package:frontend/view/search_view.dart';
 
 class MainTabView extends StatefulWidget {
   const MainTabView({super.key});
@@ -13,12 +14,11 @@ class MainTabView extends StatefulWidget {
 class _MainTabViewState extends State<MainTabView> {
   int _currentIndex = 0;
 
-  // por enquanto só a home é “de verdade”, o resto é placeholder
   final List<Widget> _pages = const [
-    HomeCompradorView(),                     // Início
-    Center(child: Text('Tela de busca')),    // Buscar
-    Center(child: Text('Tela de pedidos')),  // Pedidos
-    Center(child: Text('Tela de perfil')),   // Perfil
+    HomeCompradorView(), // Início
+    SearchView(), // Buscar
+    Center(child: Text('Tela de pedidos')), // Pedidos
+    Center(child: Text('Tela de perfil')), // Perfil
   ];
 
   @override
