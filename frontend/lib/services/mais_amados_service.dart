@@ -1,8 +1,7 @@
 import 'dart:async';
 
 class MaisAmadosService {
-  /// No futuro isso vira GET /api/home/mais-amados (ou algo assim).
-  /// Por enquanto, é só um mock em memória.
+  /// GET /api/home/mais-amados (ou algo assim).
   static Future<List<Map<String, dynamic>>> fetchMaisAmados() async {
     await Future.delayed(const Duration(milliseconds: 400));
 

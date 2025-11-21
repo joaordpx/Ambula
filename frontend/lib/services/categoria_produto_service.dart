@@ -2,14 +2,9 @@ import 'dart:async';
 import 'package:frontend/models/categoria_produto.dart';
 
 class CategoriaProdutoService {
-  /// No futuro, isso aqui vai chamar a API:
-  /// GET /api/categorias-produto
-  ///
-  /// Por enquanto, estamos usando uma lista mockada.
+  ///GET /api/categorias-produto
   static Future<List<CategoriaProduto>> fetchCategorias() async {
     await Future.delayed(const Duration(milliseconds: 500));
-
-    // TODO: substituir pelos dados vindos do backend
     return const [
       CategoriaProduto(id: 1, descricao: 'Bebidas'),
       CategoriaProduto(id: 2, descricao: 'Salgados'),
