@@ -26,7 +26,6 @@ class _StoreDetailViewState extends State<StoreDetailView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // A navbar inferior fica no widget de nível acima (MainTabView)
       backgroundColor: Colors.white,
       body: SafeArea(
         child: FutureBuilder<LojaDetalhe>(
@@ -90,9 +89,9 @@ class _StoreDetailViewState extends State<StoreDetailView> {
                 const SizedBox(height: 8),
                 Text(
                   detalhe.loja.descricao,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Colors.black87,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: TColor.secondarytext,
                     height: 1.4,
                   ),
                 ),
@@ -113,7 +112,7 @@ class _StoreDetailViewState extends State<StoreDetailView> {
                     final produto = detalhe.produtos[index];
                     return _buildProductTile(produto);
                   },
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  separatorBuilder: (_, __) => const SizedBox(height: 16),
                 ),
               ],
             ),
@@ -125,99 +124,117 @@ class _StoreDetailViewState extends State<StoreDetailView> {
 
   Widget _buildHeader(BuildContext context, LojaDetalhe detalhe) {
     final loja = detalhe.loja;
+    final Color statusColor = loja.disponivelAgora
+        ? TColor.primary
+        : TColor.accent;
 
-    return Container(
-      color: TColor.primary,
-      child: Padding(
-        padding: const EdgeInsets.only(left: 8, right: 16, top: 8, bottom: 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Linha do botão de voltar
-            IconButton(
-              onPressed: () => Navigator.of(context).pop(),
-              icon: const Icon(Icons.arrow_back_ios_new_rounded),
-              color: Colors.white,
-            ),
-
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // Avatar da loja
-                CircleAvatar(
-                  radius: 32,
-                  backgroundColor: Colors.white,
-                  backgroundImage: loja.header.isNotEmpty
-                      ? NetworkImage(loja.header)
-                      : null,
-                  child: loja.header.isEmpty
-                      ? const Icon(Icons.storefront, size: 32)
-                      : null,
-                ),
-                const SizedBox(width: 12),
-
-                // Nome, status, avaliação
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        loja.nome,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          Text(
-                            loja.disponivelAgora
-                                ? 'Disponível agora'
-                                : 'Fechado no momento',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: loja.disponivelAgora
-                                  ? Colors.white
-                                  : Colors.white70,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          const Icon(
-                            Icons.chevron_right_rounded,
-                            size: 18,
-                            color: Colors.white,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          Text(
-                            loja.avaliacao.toStringAsFixed(1),
-                            style: const TextStyle(
-                              fontSize: 13,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          const Icon(
-                            Icons.star_rounded,
-                            size: 16,
-                            color: Colors.amber,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // faixa verde botao de voltar
+        Container(
+          color: TColor.primary,
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+          child: Row(
+            children: [
+              IconButton(
+                onPressed: () => Navigator.of(context).pop(),
+                icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                color: Colors.white,
+              ),
+            ],
+          ),
         ),
-      ),
+
+        // Bloco branco com avatar, nome, status e avaliação
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Avatar da loja
+              CircleAvatar(
+                radius: 36,
+                backgroundColor: Colors.grey.shade200,
+                backgroundImage: loja.header.isNotEmpty
+                    ? NetworkImage(loja.header)
+                    : null,
+                child: loja.header.isEmpty
+                    ? const Icon(
+                        Icons.storefront,
+                        size: 32,
+                        color: Colors.black54,
+                      )
+                    : null,
+              ),
+              const SizedBox(width: 12),
+
+              // Nome, status, avaliação
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Nome da loja
+                    Text(
+                      loja.nome,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.black,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+
+                    // Status (disponível agora / fechado)
+                    Row(
+                      children: [
+                        Text(
+                          loja.disponivelAgora
+                              ? 'Disponível agora'
+                              : 'Fechado no momento',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: statusColor, // verde ou vermelho
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Icon(
+                          Icons.chevron_right_rounded,
+                          size: 18,
+                          color: statusColor,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+
+                    // Avaliação
+                    Row(
+                      children: [
+                        Text(
+                          loja.avaliacao.toStringAsFixed(1),
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: Colors.black,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        const Icon(
+                          Icons.star_rounded,
+                          size: 16,
+                          color: Colors.amber,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -233,8 +250,8 @@ class _StoreDetailViewState extends State<StoreDetailView> {
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: SizedBox(
-              width: 72,
-              height: 72,
+              width: 80,
+              height: 80,
               child: produto.imagem.isNotEmpty
                   ? Image.network(produto.imagem, fit: BoxFit.cover)
                   : Container(
@@ -258,8 +275,9 @@ class _StoreDetailViewState extends State<StoreDetailView> {
                       child: Text(
                         produto.nome,
                         style: const TextStyle(
-                          fontSize: 15,
+                          fontSize: 16,
                           fontWeight: FontWeight.w600,
+                          height: 1.3,
                         ),
                       ),
                     ),
@@ -278,9 +296,9 @@ class _StoreDetailViewState extends State<StoreDetailView> {
                   produto.descricao,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Colors.black54,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: TColor.secondarytext,
                     height: 1.3,
                   ),
                 ),
