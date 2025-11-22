@@ -3,6 +3,7 @@ import 'package:frontend/common/color_extension.dart';
 import 'package:frontend/models/loja_detalhe.dart';
 import 'package:frontend/models/produto.dart';
 import 'package:frontend/services/loja_service.dart';
+import 'package:frontend/view/product_detail_view.dart';
 
 class StoreDetailView extends StatefulWidget {
   final int lojaId;
@@ -110,7 +111,15 @@ class _StoreDetailViewState extends State<StoreDetailView> {
                   itemCount: detalhe.produtos.length,
                   itemBuilder: (context, index) {
                     final produto = detalhe.produtos[index];
-                    return _buildProductTile(produto);
+                    final loja = detalhe.loja;
+
+                    return _buildProductTile(
+                      produto,
+                      lojaNome: loja.nome,
+                      lojaAberta: loja.disponivelAgora,
+                      avaliacaoLoja: loja.avaliacao,
+                      lojaHeader: loja.header,
+                    );
                   },
                   separatorBuilder: (_, __) => const SizedBox(height: 16),
                 ),
@@ -238,10 +247,26 @@ class _StoreDetailViewState extends State<StoreDetailView> {
     );
   }
 
-  Widget _buildProductTile(Produto produto) {
+  Widget _buildProductTile(
+    Produto produto, {
+    required String lojaNome,
+    required bool lojaAberta,
+    required double avaliacaoLoja,
+    String? lojaHeader,
+  }) {
     return InkWell(
       onTap: () {
-        // futuro: abrir detalhes do produto / bottom sheet
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => ProductDetailView(
+              produto: produto,
+              lojaNome: lojaNome,
+              lojaAberta: lojaAberta,
+              avaliacaoLoja: avaliacaoLoja,
+              lojaHeader: lojaHeader,
+            ),
+          ),
+        );
       },
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
