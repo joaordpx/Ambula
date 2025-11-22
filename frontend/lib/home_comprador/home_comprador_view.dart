@@ -11,6 +11,8 @@ import 'package:frontend/home_comprador/sections/categorias_section.dart';
 import 'package:frontend/home_comprador/sections/mais_amados_section.dart';
 import 'package:frontend/home_comprador/sections/lojas_populares_section.dart';
 import 'package:frontend/home_comprador/sections/disponiveis_agora_section.dart';
+import 'package:frontend/view/store_detail_view.dart';
+import 'package:frontend/view/main_tab_view.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class HomeCompradorView extends StatefulWidget {
@@ -186,7 +188,12 @@ class _HomeCompradorViewState extends State<HomeCompradorView> {
                 CategoriasSection(
                   categorias: categorias,
                   onVerMais: () {
-                    //navegação pra tela de "todas as categorias"
+                    // navegação pra tela de "todas as categorias" (futuro)
+                  },
+                  onCategoriaTap: (categoria) {
+                    MainTabView.of(
+                      context,
+                    )?.openSearchWithTerm(categoria.descricao);
                   },
                 ),
 
@@ -207,6 +214,13 @@ class _HomeCompradorViewState extends State<HomeCompradorView> {
                   lojas: lojasPopulares,
                   onVerMais: () {
                     // navegar pra listagem de lojas
+                  },
+                  onLojaTap: (lojaId) {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => StoreDetailView(lojaId: lojaId),
+                      ),
+                    );
                   },
                 ),
 

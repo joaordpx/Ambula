@@ -6,7 +6,15 @@ class LojasPopularesSection extends StatelessWidget {
   final List<Map<String, dynamic>> lojas;
   final VoidCallback? onVerMais;
 
-  const LojasPopularesSection({super.key, required this.lojas, this.onVerMais});
+  // 👇 novo callback
+  final void Function(int lojaId)? onLojaTap;
+
+  const LojasPopularesSection({
+    super.key,
+    required this.lojas,
+    this.onVerMais,
+    this.onLojaTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -58,41 +66,50 @@ class LojasPopularesSection extends StatelessWidget {
                 final inicial = (nome.isNotEmpty ? nome.characters.first : '?')
                     .toUpperCase();
 
-                return Column(
-                  children: [
-                    // avatar circular da loja (placeholder, depois vira imagem)
-                    Container(
-                      width: 64,
-                      height: 64,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: TColor.primary.withOpacity(0.15),
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        inicial,
-                        style: GoogleFonts.inter(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w700,
-                          color: TColor.primary,
+                // 👇 pegamos o id da loja (ajusta a chave se for diferente)
+                final int? lojaId = loja['id'] is int
+                    ? loja['id'] as int
+                    : int.tryParse(loja['id']?.toString() ?? '');
+
+                return InkWell(
+                  borderRadius: BorderRadius.circular(999),
+                  onTap: lojaId != null ? () => onLojaTap?.call(lojaId) : null,
+                  child: Column(
+                    children: [
+                      // avatar circular da loja (placeholder, depois vira imagem)
+                      Container(
+                        width: 64,
+                        height: 64,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: TColor.primary.withOpacity(0.15),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          inicial,
+                          style: GoogleFonts.inter(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w700,
+                            color: TColor.primary,
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 6),
-                    SizedBox(
-                      width: 80,
-                      child: Text(
-                        nome.isEmpty ? 'Nome da Loja' : nome,
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.inter(
-                          fontSize: 12,
-                          color: TColor.primarytext,
+                      const SizedBox(height: 6),
+                      SizedBox(
+                        width: 80,
+                        child: Text(
+                          nome.isEmpty ? 'Nome da Loja' : nome,
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: TColor.primarytext,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 );
               },
             ),

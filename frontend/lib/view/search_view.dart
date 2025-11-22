@@ -6,7 +6,9 @@ import 'package:frontend/services/search_service.dart';
 import 'package:frontend/view/store_detail_view.dart';
 
 class SearchView extends StatefulWidget {
-  const SearchView({super.key});
+  final String? termoInicial;
+
+  const SearchView({super.key, this.termoInicial});
 
   @override
   State<SearchView> createState() => _SearchViewState();
@@ -24,7 +26,38 @@ class _SearchViewState extends State<SearchView> {
   @override
   void initState() {
     super.initState();
+
     _futureDescoberta = SearchDiscoveryService.loadDiscoveryData();
+
+    // tratar termos iniciais (clicou na categoria em home -> vai p busca)
+    if (widget.termoInicial != null && widget.termoInicial!.trim().isNotEmpty) {
+      final termo = widget.termoInicial!.trim();
+      _searchController.text = termo;
+      _aoSubmeterBusca(termo);
+    }
+  }
+
+  // atualizar busca quando vem outro termo da home
+  @override
+  void didUpdateWidget(covariant SearchView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.termoInicial != oldWidget.termoInicial) {
+      final novo = widget.termoInicial?.trim() ?? '';
+
+      if (novo.isEmpty) {
+        // limpar busca
+        _searchController.clear();
+        setState(() {
+          _estaBuscando = false;
+          _ultimoTermo = '';
+          _futureResultado = null;
+        });
+      } else {
+        _searchController.text = novo;
+        _aoSubmeterBusca(novo);
+      }
+    }
   }
 
   @override
@@ -33,10 +66,10 @@ class _SearchViewState extends State<SearchView> {
     super.dispose();
   }
 
-  // --- Handlers ---
-
+  // search
   void _aoSubmeterBusca(String valor) {
     final termo = valor.trim();
+
     if (termo.isEmpty) {
       setState(() {
         _estaBuscando = false;
@@ -45,6 +78,7 @@ class _SearchViewState extends State<SearchView> {
       });
       return;
     }
+
     setState(() {
       _estaBuscando = true;
       _ultimoTermo = termo;
@@ -66,8 +100,7 @@ class _SearchViewState extends State<SearchView> {
     });
   }
 
-  // --- Build ---
-
+  // build
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -124,8 +157,7 @@ class _SearchViewState extends State<SearchView> {
     );
   }
 
-  //explorar
-
+  // modo explorar da pagina de busca
   Widget _construirDescoberta() {
     return FutureBuilder<DadosDescoberta>(
       future: _futureDescoberta,
@@ -133,6 +165,7 @@ class _SearchViewState extends State<SearchView> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
+
         if (snapshot.hasError) {
           return Center(
             child: Text(
@@ -141,7 +174,9 @@ class _SearchViewState extends State<SearchView> {
             ),
           );
         }
+
         final dados = snapshot.data!;
+
         return SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Column(
@@ -156,6 +191,8 @@ class _SearchViewState extends State<SearchView> {
                 ),
               ),
               const SizedBox(height: 12),
+
+              // Grade de categorias
               GridView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -171,7 +208,9 @@ class _SearchViewState extends State<SearchView> {
                   return _construirCardCategoria(categoria);
                 },
               ),
+
               const SizedBox(height: 24),
+
               Text(
                 'Lojas mais bem avaliadas',
                 style: TextStyle(
@@ -181,6 +220,7 @@ class _SearchViewState extends State<SearchView> {
                 ),
               ),
               const SizedBox(height: 12),
+
               Column(
                 children: dados.lojasMaisBemAvaliadas
                     .map((loja) => _construirCardLoja(loja))
@@ -214,6 +254,7 @@ class _SearchViewState extends State<SearchView> {
       default:
         icone = Icons.more_horiz;
     }
+
     return InkWell(
       borderRadius: BorderRadius.circular(12),
       onTap: () => _aoTocarCategoria(categoria),
@@ -263,7 +304,6 @@ class _SearchViewState extends State<SearchView> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // imagem loja
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: Container(
@@ -277,13 +317,11 @@ class _SearchViewState extends State<SearchView> {
             ),
             const SizedBox(width: 12),
 
-            // texto (nome, status, descrição) + avaliação à direita
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Expanded(
                         child: Text(
@@ -338,8 +376,7 @@ class _SearchViewState extends State<SearchView> {
     );
   }
 
-  //abas de resultados da busca
-
+  // resultados da busca
   Widget _construirResultados() {
     if (_futureResultado == null) {
       return Center(
@@ -349,6 +386,7 @@ class _SearchViewState extends State<SearchView> {
         ),
       );
     }
+
     return DefaultTabController(
       length: 2,
       child: Column(
@@ -368,6 +406,7 @@ class _SearchViewState extends State<SearchView> {
                 ),
               ),
             ),
+
           TabBar(
             labelColor: TColor.primary,
             unselectedLabelColor: TColor.secondarytext,
@@ -377,6 +416,7 @@ class _SearchViewState extends State<SearchView> {
               Tab(text: 'Lojas'),
             ],
           ),
+
           Expanded(
             child: FutureBuilder<ResultadoBusca>(
               future: _futureResultado,
@@ -384,6 +424,7 @@ class _SearchViewState extends State<SearchView> {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
+
                 if (snapshot.hasError) {
                   return Center(
                     child: Text(
@@ -392,6 +433,7 @@ class _SearchViewState extends State<SearchView> {
                     ),
                   );
                 }
+
                 final resultado = snapshot.data!;
                 final temProdutos = resultado.produtos.isNotEmpty;
                 final temLojas = resultado.lojas.isNotEmpty;
@@ -404,6 +446,7 @@ class _SearchViewState extends State<SearchView> {
                     ),
                   );
                 }
+
                 return TabBarView(
                   children: [
                     temProdutos
@@ -421,6 +464,7 @@ class _SearchViewState extends State<SearchView> {
                               style: TextStyle(color: TColor.primarytext),
                             ),
                           ),
+
                     temLojas
                         ? ListView.builder(
                             padding: const EdgeInsets.all(16),
