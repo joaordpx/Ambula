@@ -259,6 +259,8 @@ class _StoreDetailViewState extends State<StoreDetailView> {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (_) => ProductDetailView(
+              produtoId: produto.id,
+              lojaId: produto.lojaId,
               nome: produto.nome,
               descricao: produto.descricao,
               imagemUrl: produto.imagem,

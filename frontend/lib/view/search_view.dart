@@ -493,16 +493,19 @@ class _SearchViewState extends State<SearchView> {
 
   Widget _construirCardProduto(Produto produto) {
     return InkWell(
+      borderRadius: BorderRadius.circular(12),
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (_) => ProductDetailView(
+              produtoId: produto.id,
+              lojaId: produto.lojaId,
               nome: produto.nome,
-              descricao: '', // resultado da busca não trouxe descrição
-              imagemUrl: null, // idem para imagem
+              descricao: '',
+              imagemUrl: null,
               preco: produto.valor,
               lojaNome: produto.lojaNome,
-              lojaAberta: true, // TODO: substituir quando API trouxer status
+              lojaAberta: true, // TODO: trocar quando API trouxer status
               avaliacaoLoja: produto.lojaAvaliacao,
               lojaHeader: null,
             ),
