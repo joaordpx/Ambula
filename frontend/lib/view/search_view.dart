@@ -4,6 +4,7 @@ import 'package:frontend/models/search_models.dart';
 import 'package:frontend/services/search_discovery_service.dart';
 import 'package:frontend/services/search_service.dart';
 import 'package:frontend/view/store_detail_view.dart';
+import 'package:frontend/view/product_detail_view.dart';
 
 class SearchView extends StatefulWidget {
   final String? termoInicial;
@@ -192,7 +193,7 @@ class _SearchViewState extends State<SearchView> {
               ),
               const SizedBox(height: 12),
 
-              // Grade de categorias
+              // grid categorias
               GridView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -491,66 +492,87 @@ class _SearchViewState extends State<SearchView> {
   }
 
   Widget _construirCardProduto(Produto produto) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: TColor.primary,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              color: TColor.background.withOpacity(0.5),
-              borderRadius: BorderRadius.circular(12),
+    return InkWell(
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => ProductDetailView(
+              nome: produto.nome,
+              descricao: '', // resultado da busca não trouxe descrição
+              imagemUrl: null, // idem para imagem
+              preco: produto.valor,
+              lojaNome: produto.lojaNome,
+              lojaAberta: true, // TODO: substituir quando API trouxer status
+              avaliacaoLoja: produto.lojaAvaliacao,
+              lojaHeader: null,
             ),
-            child: const Icon(Icons.fastfood),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  produto.nome,
-                  style: TextStyle(
-                    color: TColor.primarytext,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: TColor.primary,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: TColor.background.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(Icons.fastfood),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    produto.nome,
+                    style: TextStyle(
+                      color: TColor.primarytext,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  produto.lojaNome,
-                  style: TextStyle(color: TColor.secondarytext, fontSize: 13),
-                ),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    Text(
-                      'R\$ ${produto.valor.toStringAsFixed(2)}',
-                      style: TextStyle(
-                        color: TColor.primary,
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
+                  const SizedBox(height: 4),
+                  Text(
+                    produto.lojaNome,
+                    style: TextStyle(color: TColor.secondarytext, fontSize: 13),
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      Text(
+                        'R\$ ${produto.valor.toStringAsFixed(2)}',
+                        style: TextStyle(
+                          color: TColor.primary,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    const Icon(Icons.star, size: 16, color: Colors.amber),
-                    const SizedBox(width: 4),
-                    Text(
-                      produto.lojaAvaliacao.toStringAsFixed(1),
-                      style: TextStyle(color: TColor.primarytext, fontSize: 13),
-                    ),
-                  ],
-                ),
-              ],
+                      const SizedBox(width: 12),
+                      const Icon(Icons.star, size: 16, color: Colors.amber),
+                      const SizedBox(width: 4),
+                      Text(
+                        produto.lojaAvaliacao.toStringAsFixed(1),
+                        style: TextStyle(
+                          color: TColor.primarytext,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

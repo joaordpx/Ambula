@@ -3,6 +3,7 @@ import 'package:frontend/common/color_extension.dart';
 import 'package:frontend/models/loja_detalhe.dart';
 import 'package:frontend/models/produto.dart';
 import 'package:frontend/services/loja_service.dart';
+import 'package:frontend/view/product_detail_view.dart';
 
 class StoreDetailView extends StatefulWidget {
   final int lojaId;
@@ -81,7 +82,7 @@ class _StoreDetailViewState extends State<StoreDetailView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Sobre mim
+                // about me
                 const Text(
                   'Sobre mim',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
@@ -97,7 +98,7 @@ class _StoreDetailViewState extends State<StoreDetailView> {
                 ),
                 const SizedBox(height: 24),
 
-                // Todos os produtos
+                // todos os produtos
                 const Text(
                   'Todos os produtos',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
@@ -110,7 +111,15 @@ class _StoreDetailViewState extends State<StoreDetailView> {
                   itemCount: detalhe.produtos.length,
                   itemBuilder: (context, index) {
                     final produto = detalhe.produtos[index];
-                    return _buildProductTile(produto);
+                    final loja = detalhe.loja;
+
+                    return _buildProductTile(
+                      produto,
+                      lojaNome: loja.nome,
+                      lojaAberta: loja.disponivelAgora,
+                      avaliacaoLoja: loja.avaliacao,
+                      lojaHeader: loja.header,
+                    );
                   },
                   separatorBuilder: (_, __) => const SizedBox(height: 16),
                 ),
@@ -147,13 +156,13 @@ class _StoreDetailViewState extends State<StoreDetailView> {
           ),
         ),
 
-        // Bloco branco com avatar, nome, status e avaliação
+        // bloco com avatar, nome, status e avaliação
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Avatar da loja
+              // avatar loja
               CircleAvatar(
                 radius: 36,
                 backgroundColor: Colors.grey.shade200,
@@ -170,12 +179,12 @@ class _StoreDetailViewState extends State<StoreDetailView> {
               ),
               const SizedBox(width: 12),
 
-              // Nome, status, avaliação
+              // nome, status e avaliação
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Nome da loja
+                    // nome da loja
                     Text(
                       loja.nome,
                       style: const TextStyle(
@@ -186,7 +195,7 @@ class _StoreDetailViewState extends State<StoreDetailView> {
                     ),
                     const SizedBox(height: 4),
 
-                    // Status (disponível agora / fechado)
+                    // status
                     Row(
                       children: [
                         Text(
@@ -195,7 +204,7 @@ class _StoreDetailViewState extends State<StoreDetailView> {
                               : 'Fechado no momento',
                           style: TextStyle(
                             fontSize: 14,
-                            color: statusColor, // verde ou vermelho
+                            color: statusColor,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -209,7 +218,7 @@ class _StoreDetailViewState extends State<StoreDetailView> {
                     ),
                     const SizedBox(height: 4),
 
-                    // Avaliação
+                    // avaliacao da loja
                     Row(
                       children: [
                         Text(
@@ -238,15 +247,34 @@ class _StoreDetailViewState extends State<StoreDetailView> {
     );
   }
 
-  Widget _buildProductTile(Produto produto) {
+  Widget _buildProductTile(
+    Produto produto, {
+    required String lojaNome,
+    required bool lojaAberta,
+    required double avaliacaoLoja,
+    String? lojaHeader,
+  }) {
     return InkWell(
       onTap: () {
-        // futuro: abrir detalhes do produto / bottom sheet
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => ProductDetailView(
+              nome: produto.nome,
+              descricao: produto.descricao,
+              imagemUrl: produto.imagem,
+              preco: produto.preco,
+              lojaNome: lojaNome,
+              lojaAberta: lojaAberta,
+              avaliacaoLoja: avaliacaoLoja,
+              lojaHeader: lojaHeader,
+            ),
+          ),
+        );
       },
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Imagem do produto
+          // imagem do produto
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: SizedBox(
@@ -262,12 +290,12 @@ class _StoreDetailViewState extends State<StoreDetailView> {
           ),
           const SizedBox(width: 12),
 
-          // Texto
+          // texto
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Nome + preço na mesma linha
+                // nome + preço
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
