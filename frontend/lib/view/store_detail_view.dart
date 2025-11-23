@@ -82,7 +82,7 @@ class _StoreDetailViewState extends State<StoreDetailView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Sobre mim
+                // about me
                 const Text(
                   'Sobre mim',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
@@ -98,7 +98,7 @@ class _StoreDetailViewState extends State<StoreDetailView> {
                 ),
                 const SizedBox(height: 24),
 
-                // Todos os produtos
+                // todos os produtos
                 const Text(
                   'Todos os produtos',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
@@ -156,13 +156,13 @@ class _StoreDetailViewState extends State<StoreDetailView> {
           ),
         ),
 
-        // Bloco branco com avatar, nome, status e avaliação
+        // bloco com avatar, nome, status e avaliação
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Avatar da loja
+              // avatar loja
               CircleAvatar(
                 radius: 36,
                 backgroundColor: Colors.grey.shade200,
@@ -179,12 +179,12 @@ class _StoreDetailViewState extends State<StoreDetailView> {
               ),
               const SizedBox(width: 12),
 
-              // Nome, status, avaliação
+              // nome, status e avaliação
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Nome da loja
+                    // nome da loja
                     Text(
                       loja.nome,
                       style: const TextStyle(
@@ -195,7 +195,7 @@ class _StoreDetailViewState extends State<StoreDetailView> {
                     ),
                     const SizedBox(height: 4),
 
-                    // Status (disponível agora / fechado)
+                    // status
                     Row(
                       children: [
                         Text(
@@ -204,7 +204,7 @@ class _StoreDetailViewState extends State<StoreDetailView> {
                               : 'Fechado no momento',
                           style: TextStyle(
                             fontSize: 14,
-                            color: statusColor, // verde ou vermelho
+                            color: statusColor,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -218,7 +218,7 @@ class _StoreDetailViewState extends State<StoreDetailView> {
                     ),
                     const SizedBox(height: 4),
 
-                    // Avaliação
+                    // avaliacao da loja
                     Row(
                       children: [
                         Text(
@@ -259,7 +259,10 @@ class _StoreDetailViewState extends State<StoreDetailView> {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (_) => ProductDetailView(
-              produto: produto,
+              nome: produto.nome,
+              descricao: produto.descricao,
+              imagemUrl: produto.imagem,
+              preco: produto.preco,
               lojaNome: lojaNome,
               lojaAberta: lojaAberta,
               avaliacaoLoja: avaliacaoLoja,
@@ -271,7 +274,7 @@ class _StoreDetailViewState extends State<StoreDetailView> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Imagem do produto
+          // imagem do produto
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: SizedBox(
@@ -287,12 +290,12 @@ class _StoreDetailViewState extends State<StoreDetailView> {
           ),
           const SizedBox(width: 12),
 
-          // Texto
+          // texto
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Nome + preço na mesma linha
+                // nome + preço
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

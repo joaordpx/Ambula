@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/common/color_extension.dart';
-import 'package:frontend/models/produto.dart';
 
 class ProductDetailView extends StatefulWidget {
-  final Produto produto;
+  final String nome;
+  final String descricao; // pode vir vazio em alguns fluxos
+  final String? imagemUrl; // pode ser null
+  final double preco;
+
   final String lojaNome;
   final bool lojaAberta;
   final double avaliacaoLoja;
@@ -11,7 +14,10 @@ class ProductDetailView extends StatefulWidget {
 
   const ProductDetailView({
     super.key,
-    required this.produto,
+    required this.nome,
+    required this.descricao,
+    this.imagemUrl,
+    required this.preco,
     required this.lojaNome,
     required this.lojaAberta,
     required this.avaliacaoLoja,
@@ -27,28 +33,25 @@ class _ProductDetailViewState extends State<ProductDetailView> {
 
   @override
   Widget build(BuildContext context) {
-    final produto = widget.produto;
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           children: [
-            // IMAGEM + BOTÃO VOLTAR
+            // imagem + botao de voltar
             Stack(
               children: [
-                // imagem do produto
                 SizedBox(
                   width: double.infinity,
                   height: 260,
-                  child: produto.imagem.isNotEmpty
-                      ? Image.network(produto.imagem, fit: BoxFit.cover)
+                  child:
+                      (widget.imagemUrl != null && widget.imagemUrl!.isNotEmpty)
+                      ? Image.network(widget.imagemUrl!, fit: BoxFit.cover)
                       : Container(
                           color: Colors.grey[200],
                           child: const Icon(Icons.fastfood_rounded, size: 56),
                         ),
                 ),
-                // botão voltar
                 Positioned(
                   top: 8,
                   left: 8,
@@ -67,7 +70,7 @@ class _ProductDetailViewState extends State<ProductDetailView> {
               ],
             ),
 
-            // CONTEÚDO SCROLLÁVEL
+            // conteudo
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(
@@ -77,9 +80,9 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // nome do produto
+                    // nome
                     Text(
-                      produto.nome,
+                      widget.nome,
                       style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
@@ -89,9 +92,9 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                     ),
                     const SizedBox(height: 8),
 
-                    // preço
+                    // preco
                     Text(
-                      'R\$ ${produto.preco.toStringAsFixed(2)}',
+                      'R\$ ${widget.preco.toStringAsFixed(2)}',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
@@ -100,9 +103,11 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                     ),
                     const SizedBox(height: 16),
 
-                    // descrição
+                    // desc
                     Text(
-                      produto.descricao,
+                      widget.descricao.isNotEmpty
+                          ? widget.descricao
+                          : 'Descrição não informada.',
                       style: TextStyle(
                         fontSize: 14,
                         color: TColor.secondarytext,
@@ -111,11 +116,10 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                     ),
                     const SizedBox(height: 24),
 
-                    // BLOCO DA LOJA
+                    // bloco loja
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        // avatar da loja
                         CircleAvatar(
                           radius: 22,
                           backgroundColor: Colors.grey.shade200,
@@ -135,8 +139,6 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                               : null,
                         ),
                         const SizedBox(width: 10),
-
-                        // nome + status
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -165,8 +167,6 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                             ],
                           ),
                         ),
-
-                        // avaliação
                         Row(
                           children: [
                             Text(
@@ -187,13 +187,13 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                       ],
                     ),
 
-                    const SizedBox(height: 80), // respiro pro botão de baixo
+                    const SizedBox(height: 80),
                   ],
                 ),
               ),
             ),
 
-            // BARRA INFERIOR: QUANTIDADE + ADICIONAR AO CARRINHO
+            // barra inferior
             Container(
               padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
               decoration: BoxDecoration(
@@ -208,7 +208,7 @@ class _ProductDetailViewState extends State<ProductDetailView> {
               ),
               child: Row(
                 children: [
-                  // STEPPER DE QUANTIDADE
+                  // quantidade cont
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 4),
                     decoration: BoxDecoration(
@@ -220,9 +220,7 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                         IconButton(
                           onPressed: _quantidade > 1
                               ? () {
-                                  setState(() {
-                                    _quantidade--;
-                                  });
+                                  setState(() => _quantidade--);
                                 }
                               : null,
                           icon: const Icon(Icons.remove_rounded),
@@ -241,9 +239,7 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                         ),
                         IconButton(
                           onPressed: () {
-                            setState(() {
-                              _quantidade++;
-                            });
+                            setState(() => _quantidade++);
                           },
                           icon: const Icon(Icons.add_rounded),
                           constraints: const BoxConstraints(
@@ -257,7 +253,7 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                   ),
                   const SizedBox(width: 12),
 
-                  // BOTÃO ADICIONAR AO CARRINHO
+                  // add to cart
                   Expanded(
                     child: SizedBox(
                       height: 44,
@@ -273,11 +269,11 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                           ),
                         ),
                         onPressed: () {
-                          // aqui no futuro vamos integrar com o carrinho
+                          // integrar cm carrinho backend
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                '$_quantidade x ${produto.nome} adicionado(s) ao carrinho (mock).',
+                                '$_quantidade x ${widget.nome} adicionado(s) ao carrinho (mock).',
                               ),
                             ),
                           );
