@@ -1,9 +1,8 @@
 import 'dart:async';
 import 'package:frontend/models/search_models.dart';
 
-/// Service responsável pela busca de produtos e lojas.
+/// service responsável pela busca de produtos e lojas.
 class SearchService {
-  /// Busca produtos e lojas a partir de um termo.
   static Future<ResultadoBusca> search(String query) async {
     // TODO: substituir mocks por chamada real, ex:
     // final response = await http.get(Uri.parse('$baseUrl/search?query=$query'));
@@ -14,6 +13,7 @@ class SearchService {
     final todosProdutos = <Produto>[
       const Produto(
         id: 1,
+        lojaId: 1,
         nome: 'X-Burguer',
         valor: 15.90,
         lojaNome: 'Lanchonete do Campus',
@@ -22,6 +22,7 @@ class SearchService {
       ),
       const Produto(
         id: 2,
+        lojaId: 2,
         nome: 'Açaí 500ml',
         valor: 18.00,
         lojaNome: 'Delícia de cookie',
@@ -30,6 +31,7 @@ class SearchService {
       ),
       const Produto(
         id: 3,
+        lojaId: 3,
         nome: 'Suco de Laranja',
         valor: 7.50,
         lojaNome: 'Sucos & Cia',

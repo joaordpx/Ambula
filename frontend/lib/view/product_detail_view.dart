@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/common/color_extension.dart';
+import 'package:frontend/services/carrinho_service.dart';
+import 'package:frontend/view/carrinho_view.dart';
 
 class ProductDetailView extends StatefulWidget {
+  final int produtoId;
+  final int lojaId;
+
   final String nome;
-  final String descricao; // pode vir vazio em alguns fluxos
+  final String descricao; // pode vir vazia em alguns fluxos
   final String? imagemUrl; // pode ser null
   final double preco;
 
@@ -14,6 +19,8 @@ class ProductDetailView extends StatefulWidget {
 
   const ProductDetailView({
     super.key,
+    required this.produtoId,
+    required this.lojaId,
     required this.nome,
     required this.descricao,
     this.imagemUrl,
@@ -208,7 +215,7 @@ class _ProductDetailViewState extends State<ProductDetailView> {
               ),
               child: Row(
                 children: [
-                  // quantidade cont
+                  // quantidade
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 4),
                     decoration: BoxDecoration(
@@ -268,12 +275,33 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                        onPressed: () {
-                          // integrar cm carrinho backend
+                        onPressed: () async {
+                          await CarrinhoService.addItemWithSingleStoreRule(
+                            context,
+                            lojaId: widget.lojaId,
+                            lojaNome: widget.lojaNome,
+                            produtoId: widget.produtoId,
+                            nome: widget.nome,
+                            preco: widget.preco,
+                            quantidade: _quantidade,
+                          );
+
+                          if (!mounted) return;
+
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text(
-                                '$_quantidade x ${widget.nome} adicionado(s) ao carrinho (mock).',
+                              content: const Text(
+                                'Item adicionado ao carrinho',
+                              ),
+                              action: SnackBarAction(
+                                label: 'Ver carrinho',
+                                onPressed: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (_) => const CartView(),
+                                    ),
+                                  );
+                                },
                               ),
                             ),
                           );

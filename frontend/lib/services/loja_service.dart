@@ -25,6 +25,7 @@ class LojaService {
     final produtos = <Produto>[
       Produto(
         id: 1,
+        lojaId: 10,
         nome: 'Chocolate com Gotas de Chocolate ao Leite',
         descricao:
             'Um clássico irresistível! Massa macia, muitas gotas de chocolate ao leite e aquele cheirinho que toma conta do corredor.',
@@ -34,6 +35,7 @@ class LojaService {
       ),
       Produto(
         id: 2,
+        lojaId: 20,
         nome: 'Cookie de Doce de Leite com Flor de Sal',
         descricao:
             'Equilíbrio perfeito entre o doce de leite cremoso e o toque de flor de sal. Ideal pra acompanhar um café.',
@@ -43,6 +45,7 @@ class LojaService {
       ),
       Produto(
         id: 3,
+        lojaId: 30,
         nome: 'Cookie de Nutella Recheado',
         descricao:
             'Casquinha crocante por fora, coração cremoso de Nutella por dentro. Servido levemente aquecido.',
@@ -52,6 +55,7 @@ class LojaService {
       ),
       Produto(
         id: 4,
+        lojaId: 40,
         nome: 'Combo 4 Cookies Sortidos',
         descricao:
             'Escolha seus sabores favoritos e monte seu combo pra dividir (ou não) com os amigos.',
