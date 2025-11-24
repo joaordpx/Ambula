@@ -66,6 +66,26 @@ class _CartViewState extends State<CartView> {
                               horizontal: 12,
                               vertical: 8,
                             ),
+                            leading: ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: SizedBox(
+                                width: 56,
+                                height: 56,
+                                child:
+                                    (item.imageUrl != null &&
+                                        item.imageUrl!.isNotEmpty)
+                                    ? Image.network(
+                                        item.imageUrl!,
+                                        fit: BoxFit.cover,
+                                      )
+                                    : Container(
+                                        color: Colors.grey[200],
+                                        child: const Icon(
+                                          Icons.fastfood_rounded,
+                                        ),
+                                      ),
+                              ),
+                            ),
                             title: Text(
                               item.nome,
                               style: GoogleFonts.inter(
@@ -131,7 +151,6 @@ class _CartViewState extends State<CartView> {
                     },
                   ),
                 ),
-
                 // resumo + botão
                 Container(
                   padding: const EdgeInsets.symmetric(

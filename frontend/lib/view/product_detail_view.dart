@@ -281,6 +281,7 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                             lojaId: widget.lojaId,
                             lojaNome: widget.lojaNome,
                             produtoId: widget.produtoId,
+                            imageUrl: widget.imagemUrl,
                             nome: widget.nome,
                             preco: widget.preco,
                             quantidade: _quantidade,

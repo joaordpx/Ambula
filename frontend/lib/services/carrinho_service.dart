@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 class CartItem {
   final int produtoId;
   final String nome;
+  final String? imageUrl;
   final double preco;
   int quantidade;
 
   CartItem({
     required this.produtoId,
     required this.nome,
+    this.imageUrl,
     required this.preco,
     this.quantidade = 1,
   });
@@ -68,6 +70,7 @@ class CarrinhoService {
     required int produtoId,
     required String nome,
     required double preco,
+    String? imageUrl,
     int quantidade = 1,
   }) async {
     // carrinho vazio -> define loja
@@ -99,6 +102,7 @@ class CarrinhoService {
           produtoId: produtoId,
           nome: nome,
           preco: preco,
+          imageUrl: imageUrl,
           quantidade: quantidade,
         ),
       );

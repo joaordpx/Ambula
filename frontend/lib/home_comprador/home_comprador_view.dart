@@ -14,6 +14,7 @@ import 'package:frontend/home_comprador/sections/disponiveis_agora_section.dart'
 import 'package:frontend/view/store_detail_view.dart';
 import 'package:frontend/view/main_tab_view.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:frontend/view/carrinho_view.dart';
 
 class HomeCompradorView extends StatefulWidget {
   const HomeCompradorView({super.key});
@@ -132,42 +133,53 @@ class _HomeCompradorViewState extends State<HomeCompradorView> {
               ),
               const SizedBox(height: 14),
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Container(
-                    width: 42,
-                    height: 42,
-                    decoration: BoxDecoration(
-                      color: TColor.primary.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(
-                      Icons.location_on_outlined,
-                      size: 28,
-                      color: TColor.primary,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-
-                  // localização - alterar quando backend pronto
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  Row(
                     children: [
-                      Text(
-                        "Localização Atual",
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          color: TColor.secondarytext,
+                      Container(
+                        width: 42,
+                        height: 42,
+                        decoration: BoxDecoration(
+                          color: TColor.primary.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(
+                          Icons.location_on_outlined,
+                          size: 28,
+                          color: TColor.primary,
                         ),
                       ),
-                      Text(
-                        "Prédio 3 - CCET",
-                        style: GoogleFonts.inter(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: TColor.primarytext,
-                        ),
+                      const SizedBox(width: 10),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Localização Atual",
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              color: TColor.secondarytext,
+                            ),
+                          ),
+                          Text(
+                            "Prédio 3 - CCET",
+                            style: GoogleFonts.inter(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: TColor.primarytext,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.shopping_cart_outlined),
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const CartView()),
+                      );
+                    },
                   ),
                 ],
               ),
