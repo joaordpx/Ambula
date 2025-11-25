@@ -5,19 +5,18 @@ namespace App\Http\Controllers;
 use App\Models\Loja;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Routing\Controller;
 
 class LojaController extends Controller
 {
-    
     public function index()
     {
         return response()->json(Loja::with(['user', 'localizacao'])->get());
     }
 
-    
     public function store(Request $request)
     {
-        
+        // don: Apenas usuários com nível 2 (vendedor) ou 9 (admin) podem criar lojas
         if ($request->user()->nivel < 2) {
             return response()->json(['message' => 'Acesso negado. Você não tem permissão para criar lojas.'], 403);
         }
@@ -28,7 +27,6 @@ class LojaController extends Controller
                 'descricao' => 'required|string',
                 'header' => 'nullable|string',
                 'localizacao_id' => 'nullable|exists:localizacao,id',
-                
             ]);
 
             $loja = Loja::create([
@@ -51,7 +49,6 @@ class LojaController extends Controller
         }
     }
 
-    
     public function show(string $id)
     {
         $loja = Loja::with(['user', 'localizacao'])->find($id);
@@ -63,7 +60,6 @@ class LojaController extends Controller
         return response()->json($loja);
     }
 
-    
     public function update(Request $request, string $id)
     {
         $loja = Loja::find($id);
@@ -72,6 +68,7 @@ class LojaController extends Controller
             return response()->json(['message' => 'Loja não encontrada.'], 404);
         }
 
+        // Verificação de Propriedade: Apenas o dono ou um administrador pode atualizar
         if ($loja->user_id !== $request->user()->id && $request->user()->nivel < 9) {
             return response()->json(['message' => 'Acesso negado. Você não é o dono desta loja.'], 403);
         }
@@ -105,11 +102,10 @@ class LojaController extends Controller
             return response()->json(['message' => 'Loja não encontrada.'], 404);
         }
 
+        // Verificação de Propriedade: Apenas o dono ou um administrador pode deletar
         if ($loja->user_id !== request()->user()->id && request()->user()->nivel < 9) {
             return response()->json(['message' => 'Acesso negado. Você não é o dono desta loja.'], 403);
         }
-
-    
 
         $loja->delete();
 

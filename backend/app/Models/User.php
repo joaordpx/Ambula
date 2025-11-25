@@ -2,22 +2,24 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+
+use App\Models\Localizacao;
+use App\Models\Loja;
+use App\Models\Pedido;
+use App\Models\Avaliacao;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
     protected $fillable = [
         'name',
         'email',
@@ -28,22 +30,11 @@ class User extends Authenticatable
         'nivel',
     ];
 
-
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -53,29 +44,31 @@ class User extends Authenticatable
     }
 
 
-    public function localizacao()
+    public function localizacao(): BelongsTo
     {
         return $this->belongsTo(Localizacao::class);
     }
 
-    public function loja()
+    public function loja(): HasOne
     {
         return $this->hasOne(Loja::class);
     }
 
-    public function pedidos()
+    public function pedidos(): HasMany
     {
         return $this->hasMany(Pedido::class);
     }
 
-    public function avaliacoes()
+    public function avaliacoes(): HasMany
     {
         return $this->hasMany(Avaliacao::class);
     }
 
+    
     protected $appends = ['is_vendedor'];
 
-    public function getIsVendedorAttribute() : bool {
+    public function getIsVendedorAttribute(): bool
+    {
         return $this->loja()->exists();
     }
 }

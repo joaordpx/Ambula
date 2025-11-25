@@ -5,10 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\CategoriaProduto;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Routing\Controller;
 
 class CategoriaProdutoController extends Controller
 {
-    
     public function index()
     {
         return response()->json(CategoriaProduto::all());
@@ -43,6 +43,7 @@ class CategoriaProdutoController extends Controller
 
         return response()->json($categoria);
     }
+
     public function update(Request $request, string $id)
     {
         $categoria = CategoriaProduto::find($id);
@@ -68,7 +69,6 @@ class CategoriaProdutoController extends Controller
         }
     }
 
-    
     public function destroy(string $id)
     {
         $categoria = CategoriaProduto::find($id);
