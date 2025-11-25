@@ -3,6 +3,7 @@ import 'package:frontend/common/color_extension.dart';
 import 'package:frontend/common_widget/ambula_bottom_nav_bar.dart';
 import 'package:frontend/home_comprador/home_comprador_view.dart';
 import 'package:frontend/view/search_view.dart';
+import 'package:frontend/view/pedidos_view.dart';
 
 class MainTabView extends StatefulWidget {
   /// índice inicial da aba:
@@ -48,9 +49,7 @@ class _MainTabViewState extends State<MainTabView> {
         children: [
           const HomeCompradorView(), // Início
           SearchView(termoInicial: _searchInitialTerm), // Buscar
-          const Center(
-            child: Text('Tela de pedidos'),
-          ), // Pedidos (futura OrdersView)
+          const PedidosView(), // Pedidos (futura OrdersView)
           const Center(child: Text('Tela de perfil')), // Perfil
         ],
       ),
