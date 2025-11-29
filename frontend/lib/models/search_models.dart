@@ -1,6 +1,4 @@
-// lib/models/search_models.dart
-
-/// Modelo para categoria de produto (tela de busca)
+/// model categoria de produto
 class CategoriaProduto {
   final int? id;
   final String descricao;
@@ -9,15 +7,15 @@ class CategoriaProduto {
   const CategoriaProduto({this.id, required this.descricao, this.imagem});
 }
 
-/// Modelo de loja usado na busca e na seção "Lojas mais bem avaliadas".
+/// modelo de loja usado na busca e na seção "Lojas mais bem avaliadas".
 class Loja {
   final int id;
   final String nome;
-  final String categoria; // Ex.: "Lanches", "Doces"
-  final String status; // Ex.: "Disponível agora"
-  final String descricao; // Texto que vai aparecer cortado com "..."
-  final double avaliacao; // Ex.: 4.8
-  final String? imagem; // URL opcional para imagem da loja
+  final String categoria;
+  final String status;
+  final String descricao;
+  final double avaliacao;
+  final String? imagem;
 
   const Loja({
     required this.id,
@@ -30,9 +28,10 @@ class Loja {
   });
 }
 
-/// Modelo de produto para os resultados da busca.
+/// modelo de produto para os resultados da busca
 class Produto {
   final int id;
+  final int lojaId;
   final String nome;
   final double valor;
   final String lojaNome;
@@ -41,6 +40,7 @@ class Produto {
 
   const Produto({
     required this.id,
+    required this.lojaId,
     required this.nome,
     required this.valor,
     required this.lojaNome,
@@ -49,7 +49,7 @@ class Produto {
   });
 }
 
-/// Dados usados no modo "descoberta" da tela de busca.
+/// dados usados no modo "explorar" da tela de busca
 class DadosDescoberta {
   final List<CategoriaProduto> categorias;
   final List<Loja> lojasMaisBemAvaliadas;
@@ -60,7 +60,7 @@ class DadosDescoberta {
   });
 }
 
-/// Resultado da busca (produtos + lojas).
+/// resultado da busca (produtos + lojas)
 class ResultadoBusca {
   final List<Produto> produtos;
   final List<Loja> lojas;

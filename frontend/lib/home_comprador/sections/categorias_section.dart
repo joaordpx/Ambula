@@ -5,13 +5,13 @@ import 'package:google_fonts/google_fonts.dart';
 
 class CategoriasSection extends StatelessWidget {
   final List<CategoriaProduto> categorias;
-  final VoidCallback?
-  onVerMais; // callback pro "Ver mais" (pode ser null por enquanto)
-
+  final VoidCallback? onVerMais; // callback pro "Ver mais" (null por enquanto)
+  final void Function(CategoriaProduto categoria)? onCategoriaTap;
   const CategoriasSection({
     super.key,
     required this.categorias,
     this.onVerMais,
+    this.onCategoriaTap,
   });
 
   @override
@@ -58,42 +58,47 @@ class CategoriasSection extends StatelessWidget {
               separatorBuilder: (_, __) => const SizedBox(width: 16),
               itemBuilder: (context, i) {
                 final cat = categorias[i];
-                final letra = cat.descricao.characters.first;
+                final desc = cat.descricao.trim();
+                final letra = desc.isNotEmpty ? desc.characters.first : '?';
 
-                return Column(
-                  children: [
-                    Container(
-                      width: 56,
-                      height: 56,
-                      decoration: BoxDecoration(
-                        color: TColor.primary.withOpacity(0.12),
-                        shape: BoxShape.circle,
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        letra.toUpperCase(),
-                        style: GoogleFonts.inter(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                          color: TColor.primary,
+                return InkWell(
+                  borderRadius: BorderRadius.circular(999),
+                  onTap: () => onCategoriaTap?.call(cat),
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 56,
+                        height: 56,
+                        decoration: BoxDecoration(
+                          color: TColor.primary.withOpacity(0.12),
+                          shape: BoxShape.circle,
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          letra.toUpperCase(),
+                          style: GoogleFonts.inter(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
+                            color: TColor.primary,
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 6),
-                    SizedBox(
-                      width: 73,
-                      child: Text(
-                        cat.descricao,
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.inter(
-                          fontSize: 12,
-                          color: TColor.primarytext,
+                      const SizedBox(height: 6),
+                      SizedBox(
+                        width: 73,
+                        child: Text(
+                          desc.isEmpty ? 'Categoria' : desc,
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: TColor.primarytext,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 );
               },
             ),

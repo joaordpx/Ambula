@@ -59,7 +59,7 @@ class _LoginViewState extends State<LoginView> {
           MaterialPageRoute(builder: (_) => const MainTabView()),
         );
       } else {
-        // Tem loja -> perguntar se quer entrar como comprador ou vendedor
+        // tem loja -> perguntar se quer entrar como comprador ou vendedor
         await _showRoleChoiceDialog(user);
       }
     } catch (e) {
