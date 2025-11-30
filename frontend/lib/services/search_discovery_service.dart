@@ -5,7 +5,6 @@ import 'package:frontend/models/search_models.dart';
 /// (categorias + lojas mais bem avaliadas).
 class SearchDiscoveryService {
   static Future<DadosDescoberta> loadDiscoveryData() async {
-    // TODO: substituir mocks por requisições reais ao Laravel
     await Future.delayed(const Duration(milliseconds: 600));
 
     final categorias = <CategoriaProduto>[

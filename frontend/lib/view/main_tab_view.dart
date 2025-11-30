@@ -49,7 +49,7 @@ class _MainTabViewState extends State<MainTabView> {
         children: [
           const HomeCompradorView(), // Início
           SearchView(termoInicial: _searchInitialTerm), // Buscar
-          const PedidosView(), // Pedidos (futura OrdersView)
+          const PedidosView(),
           const Center(child: Text('Tela de perfil')), // Perfil
         ],
       ),

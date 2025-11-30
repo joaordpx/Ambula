@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/common/color_extension.dart';
 import 'package:frontend/models/local_entrega.dart';
+import 'package:frontend/services/pedido_service.dart';
 import 'package:frontend/services/carrinho_service.dart';
 import 'package:frontend/services/auth_service.dart';
 import 'package:frontend/view/local_entrega_view.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:frontend/view/pedido_confirmado_view.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class OrderConfirmView extends StatefulWidget {
   final LocalEntrega localEntrega;
@@ -51,13 +52,13 @@ class _OrderConfirmViewState extends State<OrderConfirmView> {
             child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                /// RESUMO DO PEDIDO
+                /// resumo pedido
                 _SectionCard(
                   title: 'Resumo do Pedido',
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Nome da loja
+                      // nome da loja
                       if (state.lojaNome != null)
                         Padding(
                           padding: const EdgeInsets.only(bottom: 8),
@@ -145,7 +146,7 @@ class _OrderConfirmViewState extends State<OrderConfirmView> {
                 ),
                 const SizedBox(height: 12),
 
-                /// DADOS DO CLIENTE
+                /// dados do cliente
                 FutureBuilder<Map<String, dynamic>>(
                   future: _futureUser,
                   builder: (context, snapshot) {
@@ -184,7 +185,7 @@ class _OrderConfirmViewState extends State<OrderConfirmView> {
                           ),
                           const SizedBox(height: 8),
 
-                          // Endereço de entrega + botão Editar
+                          // endereço entrega + botão editar
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -256,7 +257,7 @@ class _OrderConfirmViewState extends State<OrderConfirmView> {
                 ),
                 const SizedBox(height: 12),
 
-                /// FORMA DE PAGAMENTO
+                /// forma de pagamento
                 _SectionCard(
                   title: 'Forma de Pagamento',
                   child: Column(
@@ -296,7 +297,7 @@ class _OrderConfirmViewState extends State<OrderConfirmView> {
             ),
           ),
 
-          /// RODAPÉ COM TOTAL + BOTÃO CONFIRMAR
+          /// rodapé valor total e botao confirmar
           Container(
             padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
             decoration: BoxDecoration(
@@ -336,19 +337,31 @@ class _OrderConfirmViewState extends State<OrderConfirmView> {
                   width: double.infinity,
                   height: 48,
                   child: ElevatedButton(
-                    onPressed: () {
-                      // FUTURO: aqui vai a chamada ao endpoint de criar pedido,
-                      // salvar no histórico etc.
+                    onPressed: () async {
+                      try {
+                        // cria o pedido a partir do carrinho
+                        await PedidoService.criarPedidoFromCart(
+                          localEntrega: _localEntrega,
+                        );
 
-                      // Limpa o carrinho após confirmar
-                      CarrinhoService.clear();
+                        // limpa o carrinho
+                        CarrinhoService.clear();
 
-                      // Vai para o splash de pedido confirmado
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                          builder: (_) => const PedidoConfirmadoView(),
-                        ),
-                      );
+                        // vai para a tela de "Pedido Confirmado" (splash)
+                        if (!mounted) return;
+
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                            builder: (_) => const PedidoConfirmadoView(),
+                          ),
+                        );
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Erro ao confirmar pedido: $e'),
+                          ),
+                        );
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: TColor.primary,

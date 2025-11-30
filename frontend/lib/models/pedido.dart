@@ -28,7 +28,7 @@ class Pedido {
     required this.criadoEm,
   });
 
-  /// Helper pra exibir o status como texto
+  /// helper pra exibir o status como texto
   String get statusTexto {
     switch (status) {
       case PedidoStatus.emAndamento:
@@ -40,7 +40,7 @@ class Pedido {
     }
   }
 
-  /// Helper pra cor do status
+  /// helper pra cor do status
   Color statusColor(Color primary, Color accent) {
     switch (status) {
       case PedidoStatus.emAndamento:

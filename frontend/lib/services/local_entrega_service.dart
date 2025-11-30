@@ -1,8 +1,6 @@
 import 'package:frontend/models/local_entrega.dart';
 
 class LocalEntregaService {
-  // Mock fixo de locais de entrega dentro da universidade
-  // (coordenadas são exemplos; depois vocês podem ajustar com valores reais)
   static final List<LocalEntrega> _locais = [
     LocalEntrega(
       id: 1,
@@ -27,7 +25,7 @@ class LocalEntregaService {
     ),
   ];
 
-  /// Simula requisição à API que retornaria todos os locais de entrega.
+  /// simula requisição que retorna todos os locais de entrega.
   static Future<List<LocalEntrega>> listarLocais() async {
     await Future.delayed(const Duration(milliseconds: 300));
     return _locais;
