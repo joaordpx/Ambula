@@ -3,8 +3,11 @@ import 'package:frontend/common/color_extension.dart';
 import 'package:frontend/view/register_view.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:frontend/services/auth_service.dart';
+import 'package:frontend/services/loja_service.dart';
 import 'package:frontend/view/home_vendedor_view.dart';
 import 'package:frontend/view/main_tab_view.dart';
+
+enum LoginMode { comprador, vendedor }
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -46,12 +49,13 @@ class _LoginViewState extends State<LoginView> {
       final token = result['token'];
       final user = (result['user'] ?? {}) as Map<String, dynamic>;
 
-      // garante que o token está setado (login já faz isso, mas mantive pra não quebrar nada seu)
       if (token is String) {
         AuthService.setToken(token);
       }
 
-      // tenta pegar a loja do usuário
+      final nomeUsuario = (user['name'] ?? 'Usuário').toString();
+
+      // tenta pegar a loja que veio do backend
       final dynamic lojaRaw = user['loja'];
       Map<String, dynamic>? loja;
       if (lojaRaw is Map<String, dynamic>) {
@@ -62,7 +66,7 @@ class _LoginViewState extends State<LoginView> {
       String? lojaNome;
 
       if (loja != null) {
-        // tenta descobrir o id e o nome com mais tolerância a mudanças no back
+        // id tolerante (int ou string)
         final dynamic idRaw = loja['id'];
         if (idRaw is int) {
           lojaId = idRaw;
@@ -75,13 +79,27 @@ class _LoginViewState extends State<LoginView> {
                 .toString();
       }
 
+      // fallback: se o back não mandar loja, usamos a loja criada via mock
+      if (loja == null && LojaService.lojaAtual != null) {
+        final l = LojaService.lojaAtual!;
+        lojaId = l.id;
+        lojaNome = l.nome;
+      }
+
+      // flag extra caso o back mande apenas um booleano
+      final bool backendHasLojaFlag = user['has_loja'] == true;
+
+      final bool hasLoja =
+          loja != null || LojaService.lojaAtual != null || backendHasLojaFlag;
+
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Bem-vindo, ${user['name']}!')));
+      ).showSnackBar(SnackBar(content: Text('Bem-vindo, $nomeUsuario!')));
 
-      // não tem loja -> fluxo comprador direto
-      if (loja == null) {
-        if (!mounted) return;
+      if (!mounted) return;
+
+      // não tem loja -> fluxo de comprador direto
+      if (!hasLoja) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const MainTabView()),
@@ -89,8 +107,12 @@ class _LoginViewState extends State<LoginView> {
         return;
       }
 
-      // tem loja -> pergunta se entra como comprador ou vendedor
-      await _showRoleChoiceDialog(lojaId: lojaId, lojaNome: lojaNome);
+      // tem loja -> pergunta se quer entrar como comprador ou vendedor
+      await _showRoleChoiceDialog(
+        nomeUsuario: nomeUsuario,
+        lojaId: lojaId,
+        lojaNome: lojaNome,
+      );
     } catch (e) {
       ScaffoldMessenger.of(
         context,
@@ -102,18 +124,25 @@ class _LoginViewState extends State<LoginView> {
     }
   }
 
-  Future<void> _showRoleChoiceDialog({int? lojaId, String? lojaNome}) async {
+  Future<void> _showRoleChoiceDialog({
+    required String nomeUsuario,
+    int? lojaId,
+    String? lojaNome,
+  }) async {
     await showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           title: Text(
             'Como você quer entrar?',
             style: GoogleFonts.inter(fontWeight: FontWeight.w600),
           ),
           content: Text(
-            'Você possui uma loja cadastrada. '
-            'Escolha se deseja usar o app como comprador ou vendedor.',
+            'Olá, $nomeUsuario! Detectamos que você possui uma loja no Ambula. '
+            'Escolha se deseja usar o app como comprador ou como vendedor.',
             style: GoogleFonts.inter(fontSize: 14),
           ),
           actions: [
@@ -276,7 +305,7 @@ class _LoginViewState extends State<LoginView> {
                   alignment: Alignment.centerRight,
                   child: TextButton(
                     onPressed: () {
-                      // TODO: implementar fluxo de recuperação de senha (quando existir)
+                      // TODO: implementar fluxo de recuperação de senha
                     },
                     style: TextButton.styleFrom(
                       padding: EdgeInsets.zero,
