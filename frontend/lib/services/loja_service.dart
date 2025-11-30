@@ -6,6 +6,39 @@ import 'package:frontend/models/loja_detalhe.dart';
 class LojaService {
   LojaService();
 
+  /// 🔹 Mock de "loja atual" do usuário logado
+  static Loja? _lojaAtual;
+
+  /// Getter simples para outras telas (perfil, etc.)
+  static Loja? get lojaAtual => _lojaAtual;
+
+  /// Indica se o usuário já possui loja criada
+  static bool get hasLoja => _lojaAtual != null;
+
+  /// Mock para criar/registrar uma loja em memória
+  static Future<Loja> criarLojaMock({
+    required String nome,
+    required String descricao,
+  }) async {
+    // pequeno delay pra simular requisição
+    await Future.delayed(const Duration(milliseconds: 400));
+
+    // aqui poderíamos pegar um id do backend;
+    // por enquanto, algo simples:
+    final novaLoja = Loja(
+      id: DateTime.now().millisecondsSinceEpoch,
+      nome: nome,
+      header:
+          'https://images.pexels.com/photos/230325/pexels-photo-230325.jpeg',
+      descricao: descricao,
+      avaliacao: 0.0,
+      disponivelAgora: true,
+    );
+
+    _lojaAtual = novaLoja;
+    return novaLoja;
+  }
+
   Future<LojaDetalhe> getDetalhesLoja(int lojaId) async {
     await Future.delayed(const Duration(milliseconds: 600));
 
