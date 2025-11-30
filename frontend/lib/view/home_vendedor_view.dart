@@ -2,41 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:frontend/common/color_extension.dart';
 import 'package:frontend/models/pedido.dart';
 import 'package:frontend/services/pedido_service.dart';
+import 'package:frontend/services/auth_service.dart';
+import 'package:frontend/view/login_view.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class HomeVendedorView extends StatefulWidget {
-  const HomeVendedorView({super.key});
+  final int? lojaId;
+  final String? lojaNome;
+
+  const HomeVendedorView({super.key, this.lojaId, this.lojaNome});
 
   @override
   State<HomeVendedorView> createState() => _HomeVendedorViewState();
 }
 
 class _HomeVendedorViewState extends State<HomeVendedorView> {
-  /// Por enquanto, pegamos o `lojaId` e o nome da loja do primeiro pedido mock.
-  ///
-  /// No futuro:
-  /// - isso virá do usuário logado (AuthService.getMe → user.loja.id / user.loja.nome)
-  /// - e essa tela só verá os pedidos dessa loja.
-  late final int _lojaId;
-  late final String _lojaNome;
-
-  @override
-  void initState() {
-    super.initState();
-
-    final todos = PedidoService.todos;
-    if (todos.isNotEmpty) {
-      _lojaId = todos.first.lojaId;
-      _lojaNome = todos.first.lojaNome;
-    } else {
-      // fallback mock – evita crash se lista estiver vazia
-      _lojaId = 1;
-      _lojaNome = 'Minha loja';
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    // se veio do login com nome/ID de loja, usamos isso; senão caímos no mock
+    final todos = PedidoService.todos;
+    final fallbackNome = todos.isNotEmpty ? todos.first.lojaNome : 'Minha loja';
+
+    final lojaNome = widget.lojaNome ?? fallbackNome;
+
     return Scaffold(
       backgroundColor: TColor.background,
       appBar: AppBar(
@@ -55,7 +43,7 @@ class _HomeVendedorViewState extends State<HomeVendedorView> {
             ),
             const SizedBox(height: 2),
             Text(
-              _lojaNome,
+              lojaNome,
               style: GoogleFonts.inter(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
@@ -79,7 +67,7 @@ class _HomeVendedorViewState extends State<HomeVendedorView> {
               );
             },
           ),
-          // histórico de pedidos entregues (somente do vendedor)
+          // histórico de pedidos entregues (do vendedor)
           IconButton(
             icon: const Icon(Icons.history),
             color: TColor.primarytext,
@@ -97,9 +85,15 @@ class _HomeVendedorViewState extends State<HomeVendedorView> {
           IconButton(
             icon: const Icon(Icons.logout),
             color: TColor.primarytext,
-            onPressed: () {
-              // futuro: AuthService.logout + navegação pra tela de login
-              Navigator.of(context).pop();
+            onPressed: () async {
+              await AuthService.logout();
+
+              if (!mounted) return;
+
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (_) => const LoginView()),
+                (route) => false,
+              );
             },
           ),
         ],
@@ -109,10 +103,11 @@ class _HomeVendedorViewState extends State<HomeVendedorView> {
   }
 
   Widget _buildBody() {
-    // 🔹 Agora usamos os getters *filtrados por loja*:
-    final novos = PedidoService.pedidosNovosDaLoja(_lojaId);
-    final emPreparo = PedidoService.pedidosEmPreparoDaLoja(_lojaId);
-    final prontos = PedidoService.pedidosProntosDaLoja(_lojaId);
+    // por enquanto, usamos as listas globais do service.
+    // no futuro, podemos filtrar por widget.lojaId.
+    final novos = PedidoService.pedidosNovos;
+    final emPreparo = PedidoService.pedidosEmPreparo;
+    final prontos = PedidoService.pedidosProntos;
 
     return Padding(
       padding: const EdgeInsets.only(top: 8, bottom: 12),

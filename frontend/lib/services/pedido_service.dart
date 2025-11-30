@@ -76,28 +76,43 @@ class PedidoService {
       )
       .toList();
 
+  // ================== GETTERS GENÉRICOS (KANBAN VENDEDOR) ==================
+  // Usados pelo HomeVendedorView atual
+
+  /// Todos os pedidos com status "Novo"
+  static List<Pedido> get pedidosNovos =>
+      _pedidos.where((p) => p.status == PedidoStatus.novo).toList();
+
+  /// Todos os pedidos com status "Em preparo"
+  static List<Pedido> get pedidosEmPreparo =>
+      _pedidos.where((p) => p.status == PedidoStatus.emPreparo).toList();
+
+  /// Todos os pedidos com status "Pronto"
+  static List<Pedido> get pedidosProntos =>
+      _pedidos.where((p) => p.status == PedidoStatus.pronto).toList();
+
+  /// Todos os pedidos com status "Entregue"
+  static List<Pedido> get pedidosEntregues =>
+      _pedidos.where((p) => p.status == PedidoStatus.entregue).toList();
+
   // ================== GETTERS PARA VENDEDOR (FILTRADOS POR LOJA) ==================
+  // Para quando o login do vendedor já souber qual é a lojaId
 
   /// Pedidos **novos** de uma loja específica – coluna "Novos" do kanban.
-  static List<Pedido> pedidosNovosDaLoja(int lojaId) => _pedidos
-      .where((p) => p.lojaId == lojaId && p.status == PedidoStatus.novo)
-      .toList();
+  static List<Pedido> pedidosNovosDaLoja(int lojaId) =>
+      pedidosNovos.where((p) => p.lojaId == lojaId).toList();
 
   /// Pedidos **em preparo** de uma loja específica – coluna "Em preparo".
-  static List<Pedido> pedidosEmPreparoDaLoja(int lojaId) => _pedidos
-      .where((p) => p.lojaId == lojaId && p.status == PedidoStatus.emPreparo)
-      .toList();
+  static List<Pedido> pedidosEmPreparoDaLoja(int lojaId) =>
+      pedidosEmPreparo.where((p) => p.lojaId == lojaId).toList();
 
   /// Pedidos **prontos** de uma loja específica – coluna "Prontos para retirada".
-  static List<Pedido> pedidosProntosDaLoja(int lojaId) => _pedidos
-      .where((p) => p.lojaId == lojaId && p.status == PedidoStatus.pronto)
-      .toList();
+  static List<Pedido> pedidosProntosDaLoja(int lojaId) =>
+      pedidosProntos.where((p) => p.lojaId == lojaId).toList();
 
-  /// Pedidos **entregues** de uma loja específica – pode alimentar
-  /// uma coluna/aba "Entregues" no painel do vendedor.
-  static List<Pedido> pedidosEntreguesDaLoja(int lojaId) => _pedidos
-      .where((p) => p.lojaId == lojaId && p.status == PedidoStatus.entregue)
-      .toList();
+  /// Pedidos **entregues** de uma loja específica.
+  static List<Pedido> pedidosEntreguesDaLoja(int lojaId) =>
+      pedidosEntregues.where((p) => p.lojaId == lojaId).toList();
 
   // ================== MUTADORES ==================
 
@@ -129,7 +144,7 @@ class PedidoService {
 
     final novoPedido = Pedido(
       id: DateTime.now().millisecondsSinceEpoch, // id mock por enquanto
-      lojaId: carrinho.lojaId!, // 🔹 vínculo com a loja dona
+      lojaId: carrinho.lojaId!, // vínculo com a loja dona
       lojaNome: carrinho.lojaNome ?? 'Loja',
       lojaImagemUrl: null, // depois vem da API
       clienteNome: clienteNome,
