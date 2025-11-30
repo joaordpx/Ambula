@@ -4,6 +4,7 @@ import 'package:frontend/common_widget/ambula_bottom_nav_bar.dart';
 import 'package:frontend/home_comprador/home_comprador_view.dart';
 import 'package:frontend/view/search_view.dart';
 import 'package:frontend/view/pedidos_view.dart';
+import 'package:frontend/view/perfil_comprador_view.dart';
 
 class MainTabView extends StatefulWidget {
   /// índice inicial da aba:
@@ -50,7 +51,7 @@ class _MainTabViewState extends State<MainTabView> {
           const HomeCompradorView(), // Início
           SearchView(termoInicial: _searchInitialTerm), // Buscar
           const PedidosView(),
-          const Center(child: Text('Tela de perfil')), // Perfil
+          const PerfilCompradorView(), // Perfil
         ],
       ),
       bottomNavigationBar: AmbulaBottomNavBar(
