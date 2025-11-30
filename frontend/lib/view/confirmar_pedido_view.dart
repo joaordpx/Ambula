@@ -21,6 +21,9 @@ class _OrderConfirmViewState extends State<OrderConfirmView> {
   late LocalEntrega _localEntrega;
   late Future<Map<String, dynamic>> _futureUser;
 
+  String? _clienteNome;
+  String? _clienteTelefone;
+
   @override
   void initState() {
     super.initState();
@@ -52,13 +55,12 @@ class _OrderConfirmViewState extends State<OrderConfirmView> {
             child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                /// resumo pedido
+                /// RESUMO DO PEDIDO
                 _SectionCard(
                   title: 'Resumo do Pedido',
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // nome da loja
                       if (state.lojaNome != null)
                         Padding(
                           padding: const EdgeInsets.only(bottom: 8),
@@ -88,7 +90,7 @@ class _OrderConfirmViewState extends State<OrderConfirmView> {
                           ),
                         ),
 
-                      // Lista de itens
+                      // itens
                       ...state.itens.map((item) {
                         final totalItem = item.preco * item.quantidade;
                         return Padding(
@@ -146,7 +148,7 @@ class _OrderConfirmViewState extends State<OrderConfirmView> {
                 ),
                 const SizedBox(height: 12),
 
-                /// dados do cliente
+                /// DADOS DO CLIENTE
                 FutureBuilder<Map<String, dynamic>>(
                   future: _futureUser,
                   builder: (context, snapshot) {
@@ -161,6 +163,10 @@ class _OrderConfirmViewState extends State<OrderConfirmView> {
                       nome = (user['name'] ?? 'Nome não informado').toString();
                       telefone = (user['telefone'] ?? 'Telefone não informado')
                           .toString();
+
+                      // guarda pra usar na criação do pedido
+                      _clienteNome = nome;
+                      _clienteTelefone = telefone;
                     }
 
                     return _SectionCard(
@@ -185,7 +191,7 @@ class _OrderConfirmViewState extends State<OrderConfirmView> {
                           ),
                           const SizedBox(height: 8),
 
-                          // endereço entrega + botão editar
+                          // endereço de entrega + editar
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -257,7 +263,7 @@ class _OrderConfirmViewState extends State<OrderConfirmView> {
                 ),
                 const SizedBox(height: 12),
 
-                /// forma de pagamento
+                /// FORMA DE PAGAMENTO
                 _SectionCard(
                   title: 'Forma de Pagamento',
                   child: Column(
@@ -297,7 +303,7 @@ class _OrderConfirmViewState extends State<OrderConfirmView> {
             ),
           ),
 
-          /// rodapé valor total e botao confirmar
+          /// RODAPÉ
           Container(
             padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
             decoration: BoxDecoration(
@@ -339,15 +345,14 @@ class _OrderConfirmViewState extends State<OrderConfirmView> {
                   child: ElevatedButton(
                     onPressed: () async {
                       try {
-                        // cria o pedido a partir do carrinho
                         await PedidoService.criarPedidoFromCart(
                           localEntrega: _localEntrega,
+                          clienteNome: _clienteNome,
+                          clienteTelefone: _clienteTelefone,
                         );
 
-                        // limpa o carrinho
                         CarrinhoService.clear();
 
-                        // vai para a tela de "Pedido Confirmado" (splash)
                         if (!mounted) return;
 
                         Navigator.of(context).pushReplacement(
