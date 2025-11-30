@@ -43,7 +43,6 @@ class AuthService {
       }),
     );
 
-    // 🔍 logs pra ver o que o back está respondendo
     print('REGISTER STATUS: ${response.statusCode}');
     print('REGISTER BODY: ${response.body}');
 
@@ -140,6 +139,27 @@ class AuthService {
       throw Exception(
         'Erro ao carregar dados do usuário (${response.statusCode}).',
       );
+    }
+  }
+
+  // logout
+  static Future<void> logout() async {
+    if (_token == null) return;
+
+    final url = Uri.parse('$_baseUrl/logout');
+
+    try {
+      await http.post(
+        url,
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $_token',
+        },
+      );
+    } catch (_) {
+      // por enquanto ignoramos erros de rede
+    } finally {
+      _token = null;
     }
   }
 }
