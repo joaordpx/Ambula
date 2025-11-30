@@ -16,7 +16,7 @@ class AuthService {
 
   static String? get token => _token;
 
-  // registro
+  // ========= REGISTRO =========
   static Future<Map<String, dynamic>> register({
     required String name,
     required String email,
@@ -43,6 +43,7 @@ class AuthService {
       }),
     );
 
+    // logs pra debug
     print('REGISTER STATUS: ${response.statusCode}');
     print('REGISTER BODY: ${response.body}');
 
@@ -62,7 +63,7 @@ class AuthService {
     }
   }
 
-  // login
+  // ========= LOGIN =========
   static Future<Map<String, dynamic>> login({
     required String email,
     required String password,
@@ -77,6 +78,9 @@ class AuthService {
       },
       body: jsonEncode({'email': email, 'password': password}),
     );
+
+    print('LOGIN STATUS: ${response.statusCode}');
+    print('LOGIN BODY: ${response.body}');
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body) as Map<String, dynamic>;
@@ -99,7 +103,35 @@ class AuthService {
     }
   }
 
-  // me - busca dados do usuário autenticado em GET /api/me
+  // ========= LOGOUT =========
+  static Future<void> logout() async {
+    // se não tiver token, só garante que está nulo e sai
+    if (_token == null) {
+      _token = null;
+      return;
+    }
+
+    try {
+      final url = Uri.parse('$_baseUrl/logout');
+
+      await http.post(
+        url,
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $_token',
+        },
+      );
+      // mesmo que o back não tenha o /logout ainda, essa chamada vai só falhar silenciosamente.
+    } catch (e) {
+      // por enquanto, ignoramos erro de rede no logout.
+      print('Erro ao chamar /logout: $e');
+    } finally {
+      // de qualquer forma, limpamos o token em memória
+      _token = null;
+    }
+  }
+
+  // ========= /me =========
   static Future<Map<String, dynamic>> getMe() async {
     if (_token == null) {
       throw Exception('Usuário não autenticado (token ausente).');
@@ -114,6 +146,9 @@ class AuthService {
         'Authorization': 'Bearer $_token',
       },
     );
+
+    print('ME STATUS: ${response.statusCode}');
+    print('ME BODY: ${response.body}');
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
@@ -139,27 +174,6 @@ class AuthService {
       throw Exception(
         'Erro ao carregar dados do usuário (${response.statusCode}).',
       );
-    }
-  }
-
-  // logout
-  static Future<void> logout() async {
-    if (_token == null) return;
-
-    final url = Uri.parse('$_baseUrl/logout');
-
-    try {
-      await http.post(
-        url,
-        headers: {
-          'Accept': 'application/json',
-          'Authorization': 'Bearer $_token',
-        },
-      );
-    } catch (_) {
-      // por enquanto ignoramos erros de rede
-    } finally {
-      _token = null;
     }
   }
 }

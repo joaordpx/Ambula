@@ -44,24 +44,53 @@ class _LoginViewState extends State<LoginView> {
       final result = await AuthService.login(email: email, password: password);
 
       final token = result['token'];
-      final user = result['user'] as Map<String, dynamic>;
-      final loja = user['loja'];
+      final user = (result['user'] ?? {}) as Map<String, dynamic>;
 
-      AuthService.setToken(token); // grava o token em memória
+      // garante que o token está setado (login já faz isso, mas mantive pra não quebrar nada seu)
+      if (token is String) {
+        AuthService.setToken(token);
+      }
+
+      // tenta pegar a loja do usuário
+      final dynamic lojaRaw = user['loja'];
+      Map<String, dynamic>? loja;
+      if (lojaRaw is Map<String, dynamic>) {
+        loja = lojaRaw;
+      }
+
+      int? lojaId;
+      String? lojaNome;
+
+      if (loja != null) {
+        // tenta descobrir o id e o nome com mais tolerância a mudanças no back
+        final dynamic idRaw = loja['id'];
+        if (idRaw is int) {
+          lojaId = idRaw;
+        } else if (idRaw is String) {
+          lojaId = int.tryParse(idRaw);
+        }
+
+        lojaNome =
+            (loja['nome'] ?? loja['nome_loja'] ?? loja['name'] ?? 'Minha loja')
+                .toString();
+      }
 
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Bem-vindo, ${user['name']}!')));
 
+      // não tem loja -> fluxo comprador direto
       if (loja == null) {
+        if (!mounted) return;
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const MainTabView()),
         );
-      } else {
-        // tem loja -> perguntar se quer entrar como comprador ou vendedor
-        await _showRoleChoiceDialog(user);
+        return;
       }
+
+      // tem loja -> pergunta se entra como comprador ou vendedor
+      await _showRoleChoiceDialog(lojaId: lojaId, lojaNome: lojaNome);
     } catch (e) {
       ScaffoldMessenger.of(
         context,
@@ -73,7 +102,7 @@ class _LoginViewState extends State<LoginView> {
     }
   }
 
-  Future<void> _showRoleChoiceDialog(Map<String, dynamic> user) async {
+  Future<void> _showRoleChoiceDialog({int? lojaId, String? lojaNome}) async {
     await showDialog(
       context: context,
       builder: (context) {
@@ -106,7 +135,10 @@ class _LoginViewState extends State<LoginView> {
                 Navigator.of(context).pop();
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (_) => const HomeVendedorView()),
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        HomeVendedorView(lojaId: lojaId, lojaNome: lojaNome),
+                  ),
                 );
               },
               style: ElevatedButton.styleFrom(

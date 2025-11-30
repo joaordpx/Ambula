@@ -6,6 +6,11 @@ class Loja {
   final double avaliacao;
   final bool disponivelAgora;
 
+  /// Campos extras pensados para o painel do vendedor / perfil da loja
+  final String? telefone;
+  final String? localAtuacao;
+  final bool aceitaPedidosAmbula;
+
   Loja({
     required this.id,
     required this.nome,
@@ -13,6 +18,9 @@ class Loja {
     required this.descricao,
     required this.avaliacao,
     required this.disponivelAgora,
+    this.telefone,
+    this.localAtuacao,
+    this.aceitaPedidosAmbula = true,
   });
 
   factory Loja.fromJson(Map<String, dynamic> json) {
@@ -23,6 +31,11 @@ class Loja {
       descricao: json['descricao'] ?? '',
       avaliacao: (json['avaliacao'] ?? 0).toDouble(),
       disponivelAgora: json['status'] == 'aberta',
+
+      // Esses campos são “a mais” pro futuro:
+      telefone: json['telefone'],
+      localAtuacao: json['local_atuacao'],
+      aceitaPedidosAmbula: json['aceita_pedidos_ambula'] ?? true,
     );
   }
 }
