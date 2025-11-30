@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/common/color_extension.dart';
+import 'package:frontend/models/local_entrega.dart';
 import 'package:frontend/services/carrinho_service.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:frontend/view/local_entrega_view.dart';
+import 'package:frontend/view/confirmar_pedido_view.dart';
 
 class CartView extends StatefulWidget {
   const CartView({super.key});
@@ -180,15 +183,27 @@ class _CartViewState extends State<CartView> {
                         height: 44,
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: () {
-                            // futuro: chamar endpoint de criar pedido
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'Fluxo de finalizar pedido ainda não implementado.',
+                          onPressed: () async {
+                            // abre a tela de seleção de local
+                            final LocalEntrega? local =
+                                await Navigator.push<LocalEntrega?>(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        const DeliveryLocationView(),
+                                  ),
+                                );
+
+                            if (local != null) {
+                              if (!mounted) return;
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      OrderConfirmView(localEntrega: local),
                                 ),
-                              ),
-                            );
+                              );
+                            }
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.orange,
