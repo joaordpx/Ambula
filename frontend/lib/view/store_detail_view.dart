@@ -282,8 +282,8 @@ class _StoreDetailViewState extends State<StoreDetailView> {
             child: SizedBox(
               width: 80,
               height: 80,
-              child: produto.imagem.isNotEmpty
-                  ? Image.network(produto.imagem, fit: BoxFit.cover)
+              child: (produto.imagem != null && produto.imagem!.isNotEmpty)
+                  ? Image.network(produto.imagem!, fit: BoxFit.cover)
                   : Container(
                       color: Colors.grey[200],
                       child: const Icon(Icons.fastfood_rounded),

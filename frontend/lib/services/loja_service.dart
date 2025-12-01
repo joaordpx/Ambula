@@ -15,16 +15,57 @@ class LojaService {
   /// Indica se o usuário já possui loja criada
   static bool get hasLoja => _lojaAtual != null;
 
-  /// Mock para criar/registrar uma loja em memória
+  /// Lista de produtos mock usada em detalhes / cardápio
+  static final List<Produto> _produtosMock = <Produto>[
+    Produto(
+      id: 1,
+      lojaId: 1,
+      nome: 'Chocolate com Gotas de Chocolate ao Leite',
+      descricao:
+          'Um clássico irresistível! Massa macia, muitas gotas de chocolate ao leite e aquele cheirinho que toma conta do corredor.',
+      preco: 6.50,
+      imagem:
+          'https://images.pexels.com/photos/230325/pexels-photo-230325.jpeg',
+    ),
+    Produto(
+      id: 2,
+      lojaId: 1,
+      nome: 'Cookie de Doce de Leite com Flor de Sal',
+      descricao:
+          'Equilíbrio perfeito entre o doce de leite cremoso e o toque de flor de sal. Ideal pra acompanhar um café.',
+      preco: 7.00,
+      imagem:
+          'https://images.pexels.com/photos/230325/pexels-photo-230325.jpeg',
+    ),
+    Produto(
+      id: 3,
+      lojaId: 1,
+      nome: 'Cookie de Nutella Recheado',
+      descricao:
+          'Casquinha crocante por fora, coração cremoso de Nutella por dentro. Servido levemente aquecido.',
+      preco: 8.00,
+      imagem:
+          'https://images.pexels.com/photos/230325/pexels-photo-230325.jpeg',
+    ),
+    Produto(
+      id: 4,
+      lojaId: 1,
+      nome: 'Combo 4 Cookies Sortidos',
+      descricao:
+          'Escolha seus sabores favoritos e monte seu combo pra dividir (ou não) com os amigos.',
+      preco: 24.00,
+      imagem:
+          'https://images.pexels.com/photos/230325/pexels-photo-230325.jpeg',
+    ),
+  ];
+
+  /// 🔹 Cria/registrar uma loja em memória (mock) — usado na CriarLojaView
   static Future<Loja> criarLojaMock({
     required String nome,
     required String descricao,
   }) async {
-    // pequeno delay pra simular requisição
     await Future.delayed(const Duration(milliseconds: 400));
 
-    // aqui poderíamos pegar um id do backend;
-    // por enquanto, algo simples:
     final novaLoja = Loja(
       id: DateTime.now().millisecondsSinceEpoch,
       nome: nome,
@@ -39,10 +80,15 @@ class LojaService {
     return novaLoja;
   }
 
-  Future<LojaDetalhe> getDetalhesLoja(int lojaId) async {
-    await Future.delayed(const Duration(milliseconds: 600));
+  /// Garante que temos uma loja mock em memória.
+  /// - Se o usuário já criou uma loja (criarLojaMock), reaproveita.
+  /// - Se não, cai no mock padrão "Delícia de Cookie".
+  static Loja _ensureLoja(int lojaId) {
+    if (_lojaAtual != null) {
+      return _lojaAtual!;
+    }
 
-    final loja = Loja(
+    _lojaAtual = Loja(
       id: lojaId,
       nome: 'Delícia de Cookie',
       header:
@@ -55,49 +101,52 @@ class LojaService {
       disponivelAgora: true,
     );
 
-    final produtos = <Produto>[
-      Produto(
-        id: 1,
-        lojaId: 10,
-        nome: 'Chocolate com Gotas de Chocolate ao Leite',
-        descricao:
-            'Um clássico irresistível! Massa macia, muitas gotas de chocolate ao leite e aquele cheirinho que toma conta do corredor.',
-        preco: 6.50,
-        imagem:
-            'https://images.pexels.com/photos/230325/pexels-photo-230325.jpeg',
-      ),
-      Produto(
-        id: 2,
-        lojaId: 20,
-        nome: 'Cookie de Doce de Leite com Flor de Sal',
-        descricao:
-            'Equilíbrio perfeito entre o doce de leite cremoso e o toque de flor de sal. Ideal pra acompanhar um café.',
-        preco: 7.00,
-        imagem:
-            'https://images.pexels.com/photos/230325/pexels-photo-230325.jpeg',
-      ),
-      Produto(
-        id: 3,
-        lojaId: 30,
-        nome: 'Cookie de Nutella Recheado',
-        descricao:
-            'Casquinha crocante por fora, coração cremoso de Nutella por dentro. Servido levemente aquecido.',
-        preco: 8.00,
-        imagem:
-            'https://images.pexels.com/photos/230325/pexels-photo-230325.jpeg',
-      ),
-      Produto(
-        id: 4,
-        lojaId: 40,
-        nome: 'Combo 4 Cookies Sortidos',
-        descricao:
-            'Escolha seus sabores favoritos e monte seu combo pra dividir (ou não) com os amigos.',
-        preco: 24.00,
-        imagem:
-            'https://images.pexels.com/photos/230325/pexels-photo-230325.jpeg',
-      ),
-    ];
+    return _lojaAtual!;
+  }
 
-    return LojaDetalhe(loja: loja, produtos: produtos);
+  /// Usado na tela de detalhes da loja (comprador) e também no painel/config do vendedor
+  Future<LojaDetalhe> getDetalhesLoja(int lojaId) async {
+    await Future.delayed(const Duration(milliseconds: 600));
+
+    final loja = _ensureLoja(lojaId);
+
+    return LojaDetalhe(loja: loja, produtos: List.unmodifiable(_produtosMock));
+  }
+
+  /// Pega apenas o objeto Loja (sem cardápio)
+  Future<Loja> getMinhaLoja(int lojaId) async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    return _ensureLoja(lojaId);
+  }
+
+  /// Atualiza a flag "disponível agora" (abrir/fechar loja)
+  Future<Loja> atualizarDisponibilidade({
+    required int lojaId,
+    required bool aberta,
+  }) async {
+    await Future.delayed(const Duration(milliseconds: 250));
+
+    final atual = _ensureLoja(lojaId);
+    // se você criou copyWith em Loja, pode usar:
+    _lojaAtual = atual.copyWith(disponivelAgora: aberta);
+
+    return _lojaAtual!;
+  }
+
+  /// Atualiza nome e/ou descrição da loja (mock)
+  Future<Loja> atualizarDadosLoja({
+    required int lojaId,
+    String? nome,
+    String? descricao,
+  }) async {
+    await Future.delayed(const Duration(milliseconds: 400));
+
+    final atual = _ensureLoja(lojaId);
+    _lojaAtual = atual.copyWith(
+      nome: nome ?? atual.nome,
+      descricao: descricao ?? atual.descricao,
+    );
+
+    return _lojaAtual!;
   }
 }
