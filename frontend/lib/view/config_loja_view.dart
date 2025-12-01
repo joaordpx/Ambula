@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/common/color_extension.dart';
 import 'package:frontend/models/loja_detalhe.dart';
-import 'package:frontend/services/loja_service.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:frontend/models/produto.dart';
+import 'package:frontend/services/loja_service.dart';
+import 'package:frontend/services/categoria_produto_service.dart';
+import 'package:frontend/models/categoria_produto.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class ConfigLojaView extends StatefulWidget {
   final int? lojaId;
@@ -29,6 +31,11 @@ class _ConfigLojaViewState extends State<ConfigLojaView> {
   /// Lista local de produtos (cardápio da loja)
   List<Produto> _produtos = [];
 
+  /// 🔹 Categorias de produto (vêm do CategoriaProdutoService)
+  List<CategoriaProduto> _categorias = [];
+  bool _categoriasCarregando = true;
+  String? _erroCategorias;
+
   @override
   void initState() {
     super.initState();
@@ -41,6 +48,27 @@ class _ConfigLojaViewState extends State<ConfigLojaView> {
         widget.lojaId ?? LojaService.lojaAtual?.id ?? 1; // mock se nada vier
 
     _futureDetalhe = _lojaService.getDetalhesLoja(lojaId);
+
+    // carrega categorias uma vez (mock -> futuro: GET /categorias-produto)
+    _carregarCategorias();
+  }
+
+  Future<void> _carregarCategorias() async {
+    try {
+      final lista = await CategoriaProdutoService.fetchCategorias();
+      if (!mounted) return;
+      setState(() {
+        _categorias = lista;
+        _categoriasCarregando = false;
+        _erroCategorias = null;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _categoriasCarregando = false;
+        _erroCategorias = 'Erro ao carregar categorias.';
+      });
+    }
   }
 
   @override
@@ -217,7 +245,7 @@ class _ConfigLojaViewState extends State<ConfigLojaView> {
                       activeColor: TColor.primary,
                       onChanged: (value) {
                         setState(() => _recebendoPedidos = value);
-                        // LojaService.setDisponivel(value); // depois
+                        // LojaService.atualizarDisponibilidade(...); // no futuro
                       },
                     ),
                   ],
@@ -311,6 +339,22 @@ class _ConfigLojaViewState extends State<ConfigLojaView> {
   // ======== Bottom-sheet de adicionar/editar produto ========
 
   void _abrirFormProduto({Produto? produtoExistente}) {
+    if (_categoriasCarregando) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Categorias ainda estão carregando...')),
+      );
+      return;
+    }
+
+    if (_erroCategorias != null || _categorias.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Não foi possível carregar categorias de produto.'),
+        ),
+      );
+      return;
+    }
+
     final isEdicao = produtoExistente != null;
 
     final nomeCtrl = TextEditingController(text: produtoExistente?.nome ?? '');
@@ -320,9 +364,18 @@ class _ConfigLojaViewState extends State<ConfigLojaView> {
     final precoCtrl = TextEditingController(
       text: produtoExistente != null ? produtoExistente.preco.toString() : '',
     );
-    final categoriaCtrl = TextEditingController(
-      text: produtoExistente?.categoria ?? '',
-    );
+
+    // tenta descobrir categoria selecionada (edição) a partir do texto
+    CategoriaProduto? categoriaInicial;
+    if (produtoExistente?.categoria != null &&
+        produtoExistente!.categoria!.trim().isNotEmpty) {
+      categoriaInicial = _categorias.firstWhere(
+        (c) => c.descricao == produtoExistente.categoria,
+        orElse: () => _categorias.first,
+      );
+    }
+
+    CategoriaProduto? categoriaSelecionada = categoriaInicial;
 
     showModalBottomSheet(
       context: context,
@@ -331,134 +384,170 @@ class _ConfigLojaViewState extends State<ConfigLojaView> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            left: 16,
-            right: 16,
-            top: 16,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 16,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                isEdicao ? 'Editar produto' : 'Novo produto',
-                style: GoogleFonts.inter(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                left: 16,
+                right: 16,
+                top: 16,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 16,
               ),
-              const SizedBox(height: 12),
-
-              TextField(
-                controller: nomeCtrl,
-                decoration: const InputDecoration(labelText: 'Nome do produto'),
-              ),
-              const SizedBox(height: 8),
-
-              TextField(
-                controller: descCtrl,
-                maxLines: 2,
-                decoration: const InputDecoration(labelText: 'Descrição'),
-              ),
-              const SizedBox(height: 8),
-
-              TextField(
-                controller: precoCtrl,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                decoration: const InputDecoration(labelText: 'Preço (R\$)'),
-              ),
-              const SizedBox(height: 8),
-
-              TextField(
-                controller: categoriaCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Categoria (ex: Doces, Salgados...)',
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              SizedBox(
-                width: double.infinity,
-                height: 44,
-                child: ElevatedButton(
-                  onPressed: () {
-                    final nome = nomeCtrl.text.trim();
-                    final desc = descCtrl.text.trim();
-                    final precoStr = precoCtrl.text.replaceAll(',', '.').trim();
-                    final cat = categoriaCtrl.text.trim();
-
-                    if (nome.isEmpty || precoStr.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Informe pelo menos nome e preço do produto.',
-                          ),
-                        ),
-                      );
-                      return;
-                    }
-
-                    final preco = double.tryParse(precoStr);
-                    if (preco == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Preço inválido.')),
-                      );
-                      return;
-                    }
-
-                    setState(() {
-                      if (isEdicao) {
-                        final idx = _produtos.indexOf(produtoExistente!);
-                        if (idx != -1) {
-                          _produtos[idx] = Produto(
-                            id: produtoExistente.id,
-                            lojaId: produtoExistente.lojaId,
-                            nome: nome,
-                            descricao: desc,
-                            preco: preco,
-                            imagem: produtoExistente.imagem,
-                            categoria: cat,
-                          );
-                        }
-                      } else {
-                        _produtos.add(
-                          Produto(
-                            id: DateTime.now().millisecondsSinceEpoch,
-                            lojaId: widget.lojaId ?? 1,
-                            nome: nome,
-                            descricao: desc,
-                            preco: preco,
-                            imagem: null,
-                            categoria: cat,
-                          ),
-                        );
-                      }
-                    });
-
-                    Navigator.of(context).pop();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: TColor.primary,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: Text(
-                    isEdicao ? 'Salvar alterações' : 'Adicionar ao cardápio',
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    isEdicao ? 'Editar produto' : 'Novo produto',
                     style: GoogleFonts.inter(
-                      fontSize: 14,
+                      fontSize: 16,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                ),
+                  const SizedBox(height: 12),
+
+                  TextField(
+                    controller: nomeCtrl,
+                    decoration: const InputDecoration(
+                      labelText: 'Nome do produto',
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+
+                  TextField(
+                    controller: descCtrl,
+                    maxLines: 2,
+                    decoration: const InputDecoration(labelText: 'Descrição'),
+                  ),
+                  const SizedBox(height: 8),
+
+                  TextField(
+                    controller: precoCtrl,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    decoration: const InputDecoration(labelText: 'Preço (R\$)'),
+                  ),
+                  const SizedBox(height: 8),
+
+                  // 🔹 SELECT de categoria baseado em CategoriaProdutoService
+                  DropdownButtonFormField<CategoriaProduto>(
+                    value: categoriaSelecionada,
+                    items: _categorias
+                        .map(
+                          (c) => DropdownMenuItem<CategoriaProduto>(
+                            value: c,
+                            child: Text(c.descricao),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (novo) {
+                      setModalState(() {
+                        categoriaSelecionada = novo;
+                      });
+                    },
+                    decoration: const InputDecoration(labelText: 'Categoria'),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  SizedBox(
+                    width: double.infinity,
+                    height: 44,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        final nome = nomeCtrl.text.trim();
+                        final desc = descCtrl.text.trim();
+                        final precoStr = precoCtrl.text
+                            .replaceAll(',', '.')
+                            .trim();
+
+                        if (nome.isEmpty || precoStr.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Informe pelo menos nome e preço do produto.',
+                              ),
+                            ),
+                          );
+                          return;
+                        }
+
+                        if (categoriaSelecionada == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Selecione uma categoria para o produto.',
+                              ),
+                            ),
+                          );
+                          return;
+                        }
+
+                        final preco = double.tryParse(precoStr);
+                        if (preco == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Preço inválido.')),
+                          );
+                          return;
+                        }
+
+                        final catDescricao =
+                            categoriaSelecionada!.descricao; // texto exibido
+
+                        setState(() {
+                          if (isEdicao) {
+                            final idx = _produtos.indexOf(produtoExistente!);
+                            if (idx != -1) {
+                              _produtos[idx] = Produto(
+                                id: produtoExistente.id,
+                                lojaId: produtoExistente.lojaId,
+                                nome: nome,
+                                descricao: desc,
+                                preco: preco,
+                                imagem: produtoExistente.imagem,
+                                categoria: catDescricao,
+                              );
+                            }
+                          } else {
+                            _produtos.add(
+                              Produto(
+                                id: DateTime.now().millisecondsSinceEpoch,
+                                lojaId: widget.lojaId ?? 1,
+                                nome: nome,
+                                descricao: desc,
+                                preco: preco,
+                                imagem: null,
+                                categoria: catDescricao,
+                              ),
+                            );
+                          }
+                        });
+
+                        Navigator.of(context).pop();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: TColor.primary,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: Text(
+                        isEdicao
+                            ? 'Salvar alterações'
+                            : 'Adicionar ao cardápio',
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            );
+          },
         );
       },
     );
