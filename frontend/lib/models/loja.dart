@@ -38,4 +38,22 @@ class Loja {
       aceitaPedidosAmbula: json['aceita_pedidos_ambula'] ?? true,
     );
   }
+
+  Loja copyWith({
+    int? id,
+    String? nome,
+    String? header,
+    String? descricao,
+    double? avaliacao,
+    bool? disponivelAgora,
+  }) {
+    return Loja(
+      id: id ?? this.id,
+      nome: nome ?? this.nome,
+      header: header ?? this.header,
+      descricao: descricao ?? this.descricao,
+      avaliacao: avaliacao ?? this.avaliacao,
+      disponivelAgora: disponivelAgora ?? this.disponivelAgora,
+    );
+  }
 }
