@@ -102,37 +102,51 @@ class LojaController extends Controller
     /**
      * Cria loja (para vendedor) – opcional, mas já deixo pronto.
      */
-    public function store(Request $request): JsonResponse
+    public function store(Request $request)
     {
-        try {
-            $data = $request->validate([
-                'nome'           => 'required|string|max:255',
-                'descricao'      => 'nullable|string',
-                'imagem'         => 'nullable|string|max:255',
-                'avaliacao'      => 'nullable|numeric|min:0|max:5',
-                'status'         => 'boolean',
-                'localizacao_id' => 'nullable|exists:localizacao,id',
-            ]);
+        $user = $request->user();
 
-            $userId = Auth::id();
-
-            $loja = Loja::create([
-                'nome'           => $data['nome'],
-                'descricao'      => $data['descricao'] ?? null,
-                'imagem'         => $data['imagem'] ?? null,
-                'avaliacao'      => $data['avaliacao'] ?? 0,
-                'status'         => $data['status'] ?? false,
-                'localizacao_id' => $data['localizacao_id'] ?? null,
-                'user_id'        => $userId,
-            ]);
-
-            return response()->json($loja, 201);
-        } catch (ValidationException $e) {
+        if ($user->loja) {
             return response()->json([
-                'message' => 'Erro de validação.',
-                'errors'  => $e->errors(),
+                'message' => 'Usuário já possui uma loja cadastrada.',
             ], 422);
         }
+
+        $data = $request->validate([
+            'nome'           => ['required', 'string', 'max:255'],
+            'descricao'      => ['nullable', 'string'],
+            'header'         => ['nullable', 'string', 'max:255'],
+            'localizacao_id' => ['required', 'integer', 'exists:localizacao,id'],
+        ]);
+
+        $loja = Loja::create([
+            'user_id'        => $user->id,
+            'nome'           => $data['nome'],
+            'descricao'      => $data['descricao'] ?? null,
+            'header'         => $data['header'] ?? null,
+            'status'         => true,
+            'avaliacao'      => 0,
+            'localizacao_id' => $data['localizacao_id'],
+        ]);
+
+        return response()->json([
+            'message' => 'Loja criada com sucesso.',
+            'loja'    => $loja,
+        ], 201);
+    }
+
+    public function minhaLoja(Request $request)
+    {
+        $user = $request->user();
+        $user->load('loja');
+
+        if (! $user->loja) {
+            return response()->json([
+                'message' => 'Usuário não possui loja cadastrada.',
+            ], 404);
+        }
+
+        return response()->json($user->loja);
     }
 
     /**

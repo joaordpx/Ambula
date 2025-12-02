@@ -47,7 +47,8 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
-    /**
-     * Relacionamento com a Localizacao.
-     */
+    public function loja()
+    {
+        return $this->hasOne(Loja::class);
+    }
 }

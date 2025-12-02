@@ -58,42 +58,27 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        try {
-            $request->validate([
-                'email' => 'required|string|email',
-                'password' => 'required|string',
-            ]);
+        $credentials = $request->validate([
+            'email'    => ['required', 'email'],
+            'password' => ['required'],
+        ]);
 
-
-            if (!Auth::attempt($request->only('email', 'password'))) {
-                return response()->json([
-                    'message' => 'Credenciais inválidas.',
-                ], 401);
-            }
-
-
-            $user = User::where('email', $request->email)->firstOrFail();
-
-
-            $user->tokens()->delete();
-            $token = $user->createToken('auth_token')->plainTextToken;
+        if (! Auth::attempt($credentials)) {
             return response()->json([
-                'message' => 'Login realizado com sucesso.',
-                'user' => $user,
-                'token' => $token,
-                'token_type' => 'Bearer',
-            ]);
-        } catch (ValidationException $e) {
-            return response()->json([
-                'message' => 'Erro de validação.',
-                'errors' => $e->errors(),
-            ], 422);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Erro interno do servidor.',
-                'error' => $e->getMessage(),
-            ], 500);
+                'message' => 'Credenciais inválidas.',
+            ], 401);
         }
+
+        /** @var User $user */
+        $user = Auth::user();
+        $user->load('loja');
+
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'token' => $token,
+            'user'  => $this->formatUserWithLoja($user),
+        ]);
     }
 
 
@@ -145,5 +130,40 @@ class AuthController extends Controller
                 'error'   => $e->getMessage(),
             ], 500);
         }
+    }
+
+    public function me(Request $request)
+    {
+        /** @var User $user */
+        $user = $request->user();
+        $user->load('loja');
+
+        // /me já devolve direto o usuário (sem wrapper "user")
+        return response()->json(
+            $this->formatUserWithLoja($user)
+        );
+    }
+
+    protected function formatUserWithLoja(User $user): array
+    {
+        $hasLoja = $user->loja()->exists();
+
+        return [
+            'id'       => $user->id,
+            'name'     => $user->name,
+            'email'    => $user->email,
+            'telefone' => $user->telefone,
+            'cpf'      => $user->cpf,
+            'has_loja' => $hasLoja,
+            'loja'     => $hasLoja && $user->loja ? [
+                'id'             => $user->loja->id,
+                'nome'           => $user->loja->nome,
+                'descricao'      => $user->loja->descricao,
+                'header'         => $user->loja->header,
+                'status'         => $user->loja->status,
+                'avaliacao'      => $user->loja->avaliacao,
+                'localizacao_id' => $user->loja->localizacao_id,
+            ] : null,
+        ];
     }
 }

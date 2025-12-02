@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/common/color_extension.dart';
+import 'package:frontend/models/loja.dart';
 import 'package:frontend/services/auth_service.dart';
+import 'package:frontend/view/home_vendedor_view.dart';
+import 'package:frontend/view/criar_loja_view.dart';
 import 'package:frontend/view/editar_conta_view.dart';
 import 'package:frontend/view/login_view.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -21,188 +24,341 @@ class _PerfilCompradorViewState extends State<PerfilCompradorView> {
     _futureUser = AuthService.getMe();
   }
 
-  void _reloadUser() {
-    setState(() {
-      _futureUser = AuthService.getMe();
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: TColor.background,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Detalhes do Perfil',
-                style: GoogleFonts.inter(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                  color: TColor.primarytext,
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // conteúdo rolagem
-              Expanded(
-                child: FutureBuilder<Map<String, dynamic>>(
-                  future: _futureUser,
-                  builder: (context, snapshot) {
-                    String nome = 'Carregando...';
-                    String email = '-';
-                    String telefone = '-';
-
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      nome = 'Carregando...';
-                    } else if (snapshot.hasError) {
-                      nome = 'Não foi possível carregar';
-                    } else if (snapshot.hasData) {
-                      final user = snapshot.data!;
-                      nome = (user['name'] ?? 'Nome não informado').toString();
-                      email = (user['email'] ?? 'E-mail não informado')
-                          .toString();
-                      telefone = (user['telefone'] ?? '-').toString();
-                    }
-
-                    return SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          // card conta
-                          _SectionCard(
-                            title: 'Conta',
-                            child: Column(
-                              children: [
-                                InkWell(
-                                  onTap: snapshot.hasData
-                                      ? () async {
-                                          // abre tela de edição
-                                          final updated =
-                                              await Navigator.of(
-                                                context,
-                                              ).push<bool>(
-                                                MaterialPageRoute(
-                                                  builder: (_) =>
-                                                      EditarContaView(
-                                                        nomeInicial: nome,
-                                                        email: email,
-                                                        telefoneInicial:
-                                                            telefone,
-                                                      ),
-                                                ),
-                                              );
-
-                                          // se a edição retornou true, recarrega os dados do usuário
-                                          if (updated == true) {
-                                            _reloadUser();
-                                          }
-                                        }
-                                      : null,
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 10,
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        const Icon(
-                                          Icons.person_outline,
-                                          size: 22,
-                                        ),
-                                        const SizedBox(width: 10),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                nome,
-                                                style: GoogleFonts.inter(
-                                                  fontSize: 15,
-                                                  fontWeight: FontWeight.w600,
-                                                  color: TColor.primarytext,
-                                                ),
-                                              ),
-                                              const SizedBox(height: 2),
-                                              Text(
-                                                email,
-                                                style: GoogleFonts.inter(
-                                                  fontSize: 13,
-                                                  color: TColor.secondarytext,
-                                                ),
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        const Icon(
-                                          Icons.chevron_right_rounded,
-                                          size: 22,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-
-                          const SizedBox(height: 16),
-
-                          // card sessao
-                          _SectionCard(
-                            title: 'Sessão',
-                            child: InkWell(
-                              onTap: () async {
-                                await AuthService.logout();
-
-                                if (!mounted) return;
-                                Navigator.of(context).pushAndRemoveUntil(
-                                  MaterialPageRoute(
-                                    builder: (_) => const LoginView(),
-                                  ),
-                                  (route) => false,
-                                );
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 10,
-                                ),
-                                child: Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.logout_rounded,
-                                      size: 22,
-                                      color: Colors.redAccent,
-                                    ),
-                                    const SizedBox(width: 10),
-                                    Expanded(
-                                      child: Text(
-                                        'Sair da conta',
-                                        style: GoogleFonts.inter(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w500,
-                                          color: Colors.redAccent,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        titleSpacing: 16,
+        title: Text(
+          'Meu perfil',
+          style: GoogleFonts.inter(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: TColor.primarytext,
           ),
         ),
       ),
+      body: FutureBuilder<Map<String, dynamic>>(
+        future: _futureUser,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  'Não foi possível carregar seus dados.\n${snapshot.error}',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    color: TColor.secondarytext,
+                  ),
+                ),
+              ),
+            );
+          }
+
+          if (!snapshot.hasData) {
+            return Center(
+              child: Text(
+                'Nenhum dado para exibir.',
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  color: TColor.secondarytext,
+                ),
+              ),
+            );
+          }
+
+          final user = snapshot.data!;
+          final nome = (user['name'] ?? '').toString();
+          final email = (user['email'] ?? '').toString();
+          final telefone = (user['telefone'] ?? 'Não informado').toString();
+          final cpf = (user['cpf'] ?? 'Não informado').toString();
+
+          // loja vinda exclusivamente do backend
+          final dynamic lojaFromUser = user['loja'];
+          final bool hasLojaFromFlag = user['has_loja'] == true;
+
+          final dynamic loja = lojaFromUser;
+          final bool hasLoja = (lojaFromUser != null) || hasLojaFromFlag;
+
+          return ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              // HEADER
+              Row(
+                children: [
+                  CircleAvatar(
+                    radius: 26,
+                    backgroundColor: TColor.primary.withOpacity(0.15),
+                    child: Text(
+                      nome.isNotEmpty ? nome[0].toUpperCase() : '?',
+                      style: GoogleFonts.inter(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w600,
+                        color: TColor.primary,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          nome.isNotEmpty ? nome : 'Usuário',
+                          style: GoogleFonts.inter(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: TColor.primarytext,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          email,
+                          style: GoogleFonts.inter(
+                            fontSize: 13,
+                            color: TColor.secondarytext,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 20),
+
+              // DADOS DA CONTA
+              _SectionCard(
+                title: 'Dados da conta',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _infoRow('Nome', nome),
+                    const SizedBox(height: 6),
+                    _infoRow('E-mail', email),
+                    const SizedBox(height: 6),
+                    _infoRow('Telefone', telefone),
+                    const SizedBox(height: 6),
+                    _infoRow('CPF', cpf),
+                    const SizedBox(height: 10),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => EditarContaView(
+                                nomeInicial: nome,
+                                email: email,
+                                telefoneInicial: telefone,
+                              ),
+                            ),
+                          );
+                        },
+                        child: Text(
+                          'Editar dados',
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: TColor.primary,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // MINHA LOJA
+              _SectionCard(
+                title: 'Minha loja',
+                child: hasLoja
+                    ? _buildComLoja(context, loja)
+                    : _buildSemLoja(context),
+              ),
+
+              const SizedBox(height: 24),
+
+              // LOGOUT
+              SizedBox(
+                width: double.infinity,
+                height: 44,
+                child: OutlinedButton(
+                  onPressed: () {
+                    // limpa o token em memória
+                    AuthService.setToken('');
+
+                    // volta para a tela de login limpando toda a pilha
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(builder: (_) => const LoginView()),
+                      (route) => false,
+                    );
+                  },
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: TColor.accent),
+                    foregroundColor: TColor.accent,
+                    textStyle: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  child: const Text('Sair da conta'),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _infoRow(String label, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 90,
+          child: Text(
+            '$label:',
+            style: GoogleFonts.inter(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: TColor.primarytext,
+            ),
+          ),
+        ),
+        const SizedBox(width: 4),
+        Expanded(
+          child: Text(
+            value,
+            style: GoogleFonts.inter(fontSize: 13, color: TColor.primarytext),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSemLoja(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Você ainda não possui uma loja no Ambula.',
+          style: GoogleFonts.inter(fontSize: 13, color: TColor.primarytext),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Crie sua loja para começar a receber pedidos dos estudantes no campus.',
+          style: GoogleFonts.inter(
+            fontSize: 12,
+            color: TColor.secondarytext,
+            height: 1.3,
+          ),
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          width: double.infinity,
+          height: 40,
+          child: ElevatedButton(
+            onPressed: () {
+              //Navigator.of(context).push(
+              //  MaterialPageRoute(builder: (_) => const CriarLojaView()),
+              // );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: TColor.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              textStyle: GoogleFonts.inter(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            child: const Text('Criar minha loja'),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildComLoja(BuildContext context, dynamic loja) {
+    String nomeLoja;
+    String? descricao;
+
+    if (loja is Loja) {
+      nomeLoja = loja.nome;
+      descricao = loja.descricao;
+    } else if (loja is Map<String, dynamic>) {
+      nomeLoja = (loja['nome'] ?? 'Minha loja').toString();
+      descricao = loja['descricao']?.toString();
+    } else {
+      nomeLoja = 'Minha loja';
+      descricao = null;
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          nomeLoja,
+          style: GoogleFonts.inter(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: TColor.primarytext,
+          ),
+        ),
+        if (descricao != null && descricao.trim().isNotEmpty) ...[
+          const SizedBox(height: 4),
+          Text(
+            descricao,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              color: TColor.secondarytext,
+              height: 1.3,
+            ),
+          ),
+        ],
+        const SizedBox(height: 12),
+        SizedBox(
+          width: double.infinity,
+          height: 40,
+          child: ElevatedButton.icon(
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const HomeVendedorView()),
+              );
+            },
+            icon: const Icon(Icons.storefront_outlined, size: 18),
+            label: const Text('Ir para painel do vendedor'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: TColor.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              textStyle: GoogleFonts.inter(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -216,15 +372,14 @@ class _SectionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: double.infinity,
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.04),
-            blurRadius: 8,
+            blurRadius: 6,
             offset: const Offset(0, 2),
           ),
         ],
@@ -236,7 +391,7 @@ class _SectionCard extends StatelessWidget {
             title,
             style: GoogleFonts.inter(
               fontSize: 14,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w600,
               color: TColor.primarytext,
             ),
           ),

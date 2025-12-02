@@ -17,7 +17,7 @@ class Loja extends Model
     protected $fillable = [
         'nome',
         'descricao',
-        'imagem',
+        'header',
         'avaliacao',
         'status',
         'localizacao_id',

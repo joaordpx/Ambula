@@ -19,6 +19,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 
     Route::post('lojas', [LojaController::class, 'store']);
+    Route::get('/minha-loja', [LojaController::class, 'minhaLoja']);
     Route::put('lojas/{loja}', [LojaController::class, 'update']);
     Route::delete('lojas/{loja}', [LojaController::class, 'destroy']);
 
