@@ -4,15 +4,17 @@ class Produto {
   final String nome;
   final String descricao;
   final double preco;
-  final String imagem;
+  final String? imagem;
+  final String? categoria;
 
   Produto({
     required this.id,
     required this.lojaId,
     required this.nome,
+    this.categoria,
     required this.descricao,
     required this.preco,
-    required this.imagem,
+    this.imagem,
   });
 
   factory Produto.fromJson(Map<String, dynamic> json) {
@@ -31,5 +33,16 @@ class Produto {
       preco: preco,
       imagem: (json['imagem'] ?? '') as String,
     );
+  }
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'loja_id': lojaId,
+      'nome': nome,
+      'descricao': descricao,
+      'preco': preco,
+      'imagem': imagem,
+      'categoria': categoria,
+    };
   }
 }

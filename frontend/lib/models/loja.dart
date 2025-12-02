@@ -6,6 +6,11 @@ class Loja {
   final double avaliacao;
   final bool disponivelAgora;
 
+  /// Campos extras pensados para o painel do vendedor / perfil da loja
+  final String? telefone;
+  final String? localAtuacao;
+  final bool aceitaPedidosAmbula;
+
   Loja({
     required this.id,
     required this.nome,
@@ -13,6 +18,9 @@ class Loja {
     required this.descricao,
     required this.avaliacao,
     required this.disponivelAgora,
+    this.telefone,
+    this.localAtuacao,
+    this.aceitaPedidosAmbula = true,
   });
 
   factory Loja.fromJson(Map<String, dynamic> json) {

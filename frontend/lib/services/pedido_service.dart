@@ -89,6 +89,8 @@ class PedidoService {
 
   // ---------- Leitura (lista, detalhes) ----------
 
+  /// Para tela do **comprador** – “Pedidos em andamento”
+  /// (tudo que ainda não foi entregue nem cancelado).
   static List<Pedido> get pedidosEmAndamento =>
       _cache.where((p) => p.status == PedidoStatus.emAndamento).toList();
 
@@ -168,9 +170,12 @@ class PedidoService {
   /// - Atualiza o cache e retorna o Pedido já mapeado.
   static Future<Pedido> criarPedidoFromCart({
     required LocalEntrega localEntrega,
+    String? clienteNome,
+    String? clienteTelefone,
   }) async {
     final carrinho = CarrinhoService.state;
 
+    // segurança extra: não criar pedido sem loja ou sem itens
     if (carrinho.isEmpty || carrinho.lojaId == null) {
       throw Exception('Carrinho vazio ou loja não definida.');
     }
@@ -233,5 +238,48 @@ class PedidoService {
       } catch (_) {}
       throw Exception('Erro ao criar pedido (${resp.statusCode}).');
     }
+  }
+
+  // ================== ATUALIZAÇÃO DE STATUS (PAINEL VENDEDOR) ==================
+
+  /// Helper interno pra achar pedido pelo id.
+  static Pedido _findById(int id) {
+    final index = _pedidos.indexWhere((p) => p.id == id);
+    if (index == -1) {
+      throw Exception('Pedido $id não encontrado.');
+    }
+    return _pedidos[index];
+  }
+
+  /// Atualiza o status de um pedido em memória.
+  ///
+  /// ⚠️ IMPORTANTE:
+  /// - Certifica que o `status` em `Pedido` **não seja `final`**,
+  ///   senão essa atribuição não compila.
+  /// - No backend real, isso aqui vira um PATCH/PUT tipo:
+  ///   `PATCH /api/pedidos/{id} { "status": "pronto" }`.
+  static void atualizarStatus(int pedidoId, PedidoStatus novoStatus) {
+    final pedido = _findById(pedidoId);
+    pedido.status = novoStatus;
+  }
+
+  /// Exemplo: botão "Iniciar preparo" na coluna "Novos".
+  static void moverParaEmPreparo(int pedidoId) {
+    atualizarStatus(pedidoId, PedidoStatus.emPreparo);
+  }
+
+  /// Exemplo: botão "Marcar como pronto" na coluna "Em preparo".
+  static void moverParaPronto(int pedidoId) {
+    atualizarStatus(pedidoId, PedidoStatus.pronto);
+  }
+
+  /// Exemplo: botão "Marcar como entregue" na coluna "Prontos".
+  static void moverParaEntregue(int pedidoId) {
+    atualizarStatus(pedidoId, PedidoStatus.entregue);
+  }
+
+  /// Exemplo: botão "Cancelar" (pode existir em "Novos" ou "Em preparo").
+  static void cancelarPedido(int pedidoId) {
+    atualizarStatus(pedidoId, PedidoStatus.cancelado);
   }
 }

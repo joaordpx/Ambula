@@ -102,13 +102,12 @@ class _ConfirmarPedidoViewState extends State<ConfirmarPedidoView> {
             child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                /// resumo pedido
+                /// RESUMO DO PEDIDO
                 _SectionCard(
                   title: 'Resumo do Pedido',
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // nome da loja
                       if (state.lojaNome != null)
                         Padding(
                           padding: const EdgeInsets.only(bottom: 8),
@@ -138,7 +137,7 @@ class _ConfirmarPedidoViewState extends State<ConfirmarPedidoView> {
                           ),
                         ),
 
-                      // Lista de itens
+                      // itens
                       ...state.itens.map((item) {
                         final totalItem = item.preco * item.quantidade;
                         return Padding(
@@ -196,7 +195,7 @@ class _ConfirmarPedidoViewState extends State<ConfirmarPedidoView> {
                 ),
                 const SizedBox(height: 12),
 
-                /// dados do cliente
+                /// DADOS DO CLIENTE
                 FutureBuilder<Map<String, dynamic>>(
                   future: _futureUser,
                   builder: (context, snapshot) {
@@ -211,6 +210,10 @@ class _ConfirmarPedidoViewState extends State<ConfirmarPedidoView> {
                       nome = (user['name'] ?? 'Nome não informado').toString();
                       telefone = (user['telefone'] ?? 'Telefone não informado')
                           .toString();
+
+                      // guarda pra usar na criação do pedido
+                      _clienteNome = nome;
+                      _clienteTelefone = telefone;
                     }
 
                     return _SectionCard(
@@ -307,7 +310,7 @@ class _ConfirmarPedidoViewState extends State<ConfirmarPedidoView> {
                 ),
                 const SizedBox(height: 12),
 
-                /// forma de pagamento
+                /// FORMA DE PAGAMENTO
                 _SectionCard(
                   title: 'Forma de Pagamento',
                   child: Column(
@@ -347,7 +350,7 @@ class _ConfirmarPedidoViewState extends State<ConfirmarPedidoView> {
             ),
           ),
 
-          /// rodapé valor total e botao confirmar
+          /// RODAPÉ
           Container(
             padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
             decoration: BoxDecoration(
