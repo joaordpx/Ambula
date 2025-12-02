@@ -5,8 +5,9 @@ import 'package:google_fonts/google_fonts.dart';
 
 class CategoriasSection extends StatelessWidget {
   final List<CategoriaProduto> categorias;
-  final VoidCallback? onVerMais; // callback pro "Ver mais" (null por enquanto)
+  final VoidCallback? onVerMais;
   final void Function(CategoriaProduto categoria)? onCategoriaTap;
+
   const CategoriasSection({
     super.key,
     required this.categorias,
@@ -21,89 +22,89 @@ class CategoriasSection extends StatelessWidget {
     }
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.fromLTRB(16, 12, 0, 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Categorias de Produtos",
-                style: GoogleFonts.inter(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: TColor.primarytext,
-                ),
-              ),
-              InkWell(
-                onTap: onVerMais,
-                child: Text(
-                  "Ver mais",
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: TColor.primary,
-                  ),
-                ),
-              ),
-            ],
-          ),
+          _buildTitleRow(),
           const SizedBox(height: 12),
           SizedBox(
-            height: 90,
+            height: 44,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: categorias.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 16),
-              itemBuilder: (context, i) {
-                final cat = categorias[i];
-                final desc = cat.descricao.trim();
-                final letra = desc.isNotEmpty ? desc.characters.first : '?';
-
-                return InkWell(
-                  borderRadius: BorderRadius.circular(999),
+              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              itemBuilder: (context, index) {
+                final cat = categorias[index];
+                return _CategoriaChip(
+                  label: cat.descricao,
                   onTap: () => onCategoriaTap?.call(cat),
-                  child: Column(
-                    children: [
-                      Container(
-                        width: 56,
-                        height: 56,
-                        decoration: BoxDecoration(
-                          color: TColor.primary.withOpacity(0.12),
-                          shape: BoxShape.circle,
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          letra.toUpperCase(),
-                          style: GoogleFonts.inter(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w600,
-                            color: TColor.primary,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      SizedBox(
-                        width: 73,
-                        child: Text(
-                          desc.isEmpty ? 'Categoria' : desc,
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.inter(
-                            fontSize: 12,
-                            color: TColor.primarytext,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
                 );
               },
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildTitleRow() {
+    return Row(
+      children: [
+        Text(
+          'Categorias',
+          style: GoogleFonts.inter(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: TColor.primarytext,
+          ),
+        ),
+        const Spacer(),
+        if (onVerMais != null)
+          TextButton(
+            onPressed: onVerMais,
+            child: Text(
+              'Ver todas',
+              style: GoogleFonts.inter(fontSize: 13, color: TColor.primary),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _CategoriaChip extends StatelessWidget {
+  final String label;
+  final VoidCallback? onTap;
+
+  const _CategoriaChip({required this.label, this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(999),
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(999),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+            color: TColor.primarytext,
+          ),
+        ),
       ),
     );
   }

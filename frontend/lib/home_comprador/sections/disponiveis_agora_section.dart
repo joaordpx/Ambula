@@ -3,111 +3,81 @@ import 'package:frontend/common/color_extension.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class DisponiveisAgoraSection extends StatelessWidget {
-  final List<Map<String, dynamic>> produtos;
-  final VoidCallback onVerMais;
+  final List<Map<String, dynamic>> lojas;
+  final VoidCallback? onVerMais;
+  final void Function(int lojaId)? onLojaTap;
 
   const DisponiveisAgoraSection({
     super.key,
-    required this.produtos,
-    required this.onVerMais,
+    required this.lojas,
+    this.onVerMais,
+    this.onLojaTap,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (lojas.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.fromLTRB(16, 8, 0, 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Disponíveis Agora",
-                style: GoogleFonts.inter(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              GestureDetector(
-                onTap: onVerMais,
-                child: Text(
-                  "Ver mais",
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: TColor.primary,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-
+          _buildTitleRow(),
+          const SizedBox(height: 12),
           SizedBox(
-            height: 220,
+            height: 130,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
-              itemCount: produtos.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 14),
-              itemBuilder: (context, i) {
-                final item = produtos[i];
+              itemCount: lojas.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 12),
+              itemBuilder: (context, index) {
+                final loja = lojas[index];
+                final int id = (loja['id'] as num).toInt();
+                final nome = (loja['nome'] ?? '').toString();
 
-                return SizedBox(
-                  width: 160,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(14),
-                        child: Image.network(
-                          item["imagem"],
-                          height: 110,
-                          width: 160,
-                          fit: BoxFit.cover,
+                return GestureDetector(
+                  onTap: () => onLojaTap?.call(id),
+                  child: Container(
+                    width: 180,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.04),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
                         ),
-                      ),
-                      const SizedBox(height: 6),
-
-                      Text(
-                        item["nome"],
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-
-                      Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 12,
-                            backgroundImage: NetworkImage(
-                              item["ambulante"]["foto"],
-                            ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          nome,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: TColor.primarytext,
                           ),
-                          const SizedBox(width: 6),
-                          Expanded(
-                            child: Text(
-                              item["ambulante"]["nome"],
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: GoogleFonts.inter(fontSize: 12),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-
-                      Text(
-                        "Disponível Agora",
-                        style: GoogleFonts.inter(
-                          fontSize: 12,
-                          color: Colors.green[700],
-                          fontWeight: FontWeight.w600,
                         ),
-                      ),
-                    ],
+                        const Spacer(),
+                        Text(
+                          'Aberto agora',
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.green,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },
@@ -115,6 +85,30 @@ class DisponiveisAgoraSection extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildTitleRow() {
+    return Row(
+      children: [
+        Text(
+          'Disponíveis agora',
+          style: GoogleFonts.inter(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: TColor.primarytext,
+          ),
+        ),
+        const Spacer(),
+        if (onVerMais != null)
+          TextButton(
+            onPressed: onVerMais,
+            child: Text(
+              'Ver todos',
+              style: GoogleFonts.inter(fontSize: 13, color: TColor.primary),
+            ),
+          ),
+      ],
     );
   }
 }

@@ -2,11 +2,14 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:frontend/common/color_extension.dart';
+import 'package:frontend/models/pedido.dart';
 import 'package:frontend/view/main_tab_view.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class PedidoConfirmadoView extends StatefulWidget {
-  const PedidoConfirmadoView({super.key});
+  final Pedido pedido;
+
+  const PedidoConfirmadoView({super.key, required this.pedido});
 
   @override
   State<PedidoConfirmadoView> createState() => _PedidoConfirmadoViewState();
@@ -27,8 +30,24 @@ class _PedidoConfirmadoViewState extends State<PedidoConfirmadoView> {
     });
   }
 
+  String _statusLabel(PedidoStatus status) {
+    switch (status) {
+      case PedidoStatus.emAndamento:
+        return 'Em andamento';
+      case PedidoStatus.entregue:
+        return 'Entregue';
+      case PedidoStatus.cancelado:
+        return 'Cancelado';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final pedido = widget.pedido;
+
+    final statusTexto = _statusLabel(pedido.status);
+    final statusCor = pedido.statusColor(TColor.primary, Colors.redAccent);
+
     return Scaffold(
       backgroundColor: TColor.background,
       body: Center(
@@ -61,6 +80,35 @@ class _PedidoConfirmadoViewState extends State<PedidoConfirmadoView> {
                 ),
               ),
               const SizedBox(height: 8),
+              Text(
+                'Número do pedido: #${pedido.id}',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: TColor.primarytext,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Loja: ${pedido.lojaNome}',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  color: TColor.secondarytext,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Status: $statusTexto',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: statusCor,
+                ),
+              ),
+              const SizedBox(height: 12),
               Text(
                 'Você poderá acompanhar o status na aba de Pedidos.',
                 textAlign: TextAlign.center,

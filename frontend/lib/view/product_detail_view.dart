@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/common/color_extension.dart';
 import 'package:frontend/services/carrinho_service.dart';
+import 'package:frontend/view/store_detail_view.dart';
 import 'package:frontend/view/carrinho_view.dart';
 
 class ProductDetailView extends StatefulWidget {
@@ -123,75 +124,88 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                     ),
                     const SizedBox(height: 24),
 
+                    const SizedBox(height: 24),
+
                     // bloco loja
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        CircleAvatar(
-                          radius: 22,
-                          backgroundColor: Colors.grey.shade200,
-                          backgroundImage:
-                              (widget.lojaHeader != null &&
-                                  widget.lojaHeader!.isNotEmpty)
-                              ? NetworkImage(widget.lojaHeader!)
-                              : null,
-                          child:
-                              (widget.lojaHeader == null ||
-                                  widget.lojaHeader!.isEmpty)
-                              ? const Icon(
-                                  Icons.storefront,
-                                  size: 22,
-                                  color: Colors.black54,
-                                )
-                              : null,
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                    InkWell(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                StoreDetailView(lojaId: widget.lojaId),
+                          ),
+                        );
+                      },
+                      borderRadius: BorderRadius.circular(12),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          CircleAvatar(
+                            radius: 22,
+                            backgroundColor: Colors.grey.shade200,
+                            backgroundImage:
+                                (widget.lojaHeader != null &&
+                                    widget.lojaHeader!.isNotEmpty)
+                                ? NetworkImage(widget.lojaHeader!)
+                                : null,
+                            child:
+                                (widget.lojaHeader == null ||
+                                    widget.lojaHeader!.isEmpty)
+                                ? const Icon(
+                                    Icons.storefront,
+                                    size: 22,
+                                    color: Colors.black54,
+                                  )
+                                : null,
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  widget.lojaNome,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  widget.lojaAberta
+                                      ? 'Disponível agora'
+                                      : 'Fechada no momento',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                    color: widget.lojaAberta
+                                        ? TColor.primary
+                                        : TColor.accent,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Row(
                             children: [
                               Text(
-                                widget.lojaNome,
+                                widget.avaliacaoLoja.toStringAsFixed(1),
                                 style: const TextStyle(
-                                  fontSize: 14,
+                                  fontSize: 13,
                                   fontWeight: FontWeight.w600,
                                 ),
-                                overflow: TextOverflow.ellipsis,
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                widget.lojaAberta
-                                    ? 'Disponível agora'
-                                    : 'Fechada no momento',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w500,
-                                  color: widget.lojaAberta
-                                      ? TColor.primary
-                                      : TColor.accent,
-                                ),
+                              const SizedBox(width: 4),
+                              const Icon(
+                                Icons.star_rounded,
+                                size: 16,
+                                color: Colors.amber,
                               ),
                             ],
                           ),
-                        ),
-                        Row(
-                          children: [
-                            Text(
-                              widget.avaliacaoLoja.toStringAsFixed(1),
-                              style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            const Icon(
-                              Icons.star_rounded,
-                              size: 16,
-                              color: Colors.amber,
-                            ),
-                          ],
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
 
                     const SizedBox(height: 80),

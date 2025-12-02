@@ -5,8 +5,6 @@ import 'package:google_fonts/google_fonts.dart';
 class LojasPopularesSection extends StatelessWidget {
   final List<Map<String, dynamic>> lojas;
   final VoidCallback? onVerMais;
-
-  // 👇 novo callback
   final void Function(int lojaId)? onLojaTap;
 
   const LojasPopularesSection({
@@ -23,92 +21,73 @@ class LojasPopularesSection extends StatelessWidget {
     }
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.fromLTRB(16, 8, 0, 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Título + "Ver mais"
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Lojas Mais Populares",
-                style: GoogleFonts.inter(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: TColor.primarytext,
-                ),
-              ),
-              InkWell(
-                onTap: onVerMais,
-                child: Text(
-                  "Ver mais",
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: TColor.primary,
-                  ),
-                ),
-              ),
-            ],
-          ),
+          _buildTitleRow(),
           const SizedBox(height: 12),
-
           SizedBox(
-            height: 110,
+            height: 130,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: lojas.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 16),
+              separatorBuilder: (_, __) => const SizedBox(width: 12),
               itemBuilder: (context, index) {
                 final loja = lojas[index];
-                final nome = (loja['nome'] ?? '').toString().trim();
-                final inicial = (nome.isNotEmpty ? nome.characters.first : '?')
-                    .toUpperCase();
+                final int id = (loja['id'] as num).toInt();
+                final nome = (loja['nome'] ?? '').toString();
+                final avaliacao = (loja['avaliacao'] ?? 0).toString();
 
-                // 👇 pegamos o id da loja (ajusta a chave se for diferente)
-                final int? lojaId = loja['id'] is int
-                    ? loja['id'] as int
-                    : int.tryParse(loja['id']?.toString() ?? '');
-
-                return InkWell(
-                  borderRadius: BorderRadius.circular(999),
-                  onTap: lojaId != null ? () => onLojaTap?.call(lojaId) : null,
-                  child: Column(
-                    children: [
-                      // avatar circular da loja (placeholder, depois vira imagem)
-                      Container(
-                        width: 64,
-                        height: 64,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: TColor.primary.withOpacity(0.15),
+                return GestureDetector(
+                  onTap: () => onLojaTap?.call(id),
+                  child: Container(
+                    width: 180,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.04),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
                         ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          inicial,
-                          style: GoogleFonts.inter(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w700,
-                            color: TColor.primary,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      SizedBox(
-                        width: 80,
-                        child: Text(
-                          nome.isEmpty ? 'Nome da Loja' : nome,
-                          textAlign: TextAlign.center,
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          nome,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.inter(
-                            fontSize: 12,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
                             color: TColor.primarytext,
                           ),
                         ),
-                      ),
-                    ],
+                        const Spacer(),
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.star_rounded,
+                              size: 16,
+                              color: Colors.amber,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              avaliacao,
+                              style: GoogleFonts.inter(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },
@@ -116,6 +95,30 @@ class LojasPopularesSection extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildTitleRow() {
+    return Row(
+      children: [
+        Text(
+          'Lojas populares',
+          style: GoogleFonts.inter(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: TColor.primarytext,
+          ),
+        ),
+        const Spacer(),
+        if (onVerMais != null)
+          TextButton(
+            onPressed: onVerMais,
+            child: Text(
+              'Ver todas',
+              style: GoogleFonts.inter(fontSize: 13, color: TColor.primary),
+            ),
+          ),
+      ],
     );
   }
 }

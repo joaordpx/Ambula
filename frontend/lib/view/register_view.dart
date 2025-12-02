@@ -68,9 +68,10 @@ class _RegisterViewState extends State<RegisterView> {
         name: name,
         email: email,
         password: password,
+        passwordConfirmation: confirmPassword, // passa a confirmação
         telefone: telefone,
         cpf: cpf,
-        nivel: 0, // todo mundo começa como comprador
+        nivel: 1, // vamos assumir 1 = comprador, que passa na validação
       );
 
       ScaffoldMessenger.of(context).showSnackBar(

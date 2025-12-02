@@ -3,6 +3,7 @@ import 'package:frontend/common/color_extension.dart';
 import 'package:frontend/models/local_entrega.dart';
 import 'package:frontend/services/carrinho_service.dart';
 import 'package:google_fonts/google_fonts.dart';
+
 import 'package:frontend/view/local_entrega_view.dart';
 import 'package:frontend/view/confirmar_pedido_view.dart';
 
@@ -50,6 +51,7 @@ class _CartViewState extends State<CartView> {
                     itemCount: state.itens.length,
                     itemBuilder: (context, index) {
                       final item = state.itens[index];
+
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 12),
                         child: Container(
@@ -154,6 +156,7 @@ class _CartViewState extends State<CartView> {
                     },
                   ),
                 ),
+
                 // resumo + botão
                 Container(
                   padding: const EdgeInsets.symmetric(
@@ -184,23 +187,25 @@ class _CartViewState extends State<CartView> {
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: () async {
-                            // abre a tela de seleção de local
+                            if (state.isEmpty) return;
+
+                            // 1) Seleciona local de entrega
                             final LocalEntrega? local =
                                 await Navigator.push<LocalEntrega?>(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (_) =>
-                                        const DeliveryLocationView(),
+                                    builder: (_) => const LocalEntregaView(),
                                   ),
                                 );
 
+                            // 2) Se escolheu local, vai para tela de confirmação
                             if (local != null) {
                               if (!mounted) return;
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (_) =>
-                                      OrderConfirmView(localEntrega: local),
+                                      ConfirmarPedidoView(localEntrega: local),
                                 ),
                               );
                             }

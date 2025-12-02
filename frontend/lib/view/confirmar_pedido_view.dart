@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/common/color_extension.dart';
 import 'package:frontend/models/local_entrega.dart';
+import 'package:frontend/models/pedido.dart';
 import 'package:frontend/services/pedido_service.dart';
 import 'package:frontend/services/carrinho_service.dart';
 import 'package:frontend/services/auth_service.dart';
@@ -8,24 +9,73 @@ import 'package:frontend/view/local_entrega_view.dart';
 import 'package:frontend/view/pedido_confirmado_view.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class OrderConfirmView extends StatefulWidget {
+class ConfirmarPedidoView extends StatefulWidget {
   final LocalEntrega localEntrega;
 
-  const OrderConfirmView({super.key, required this.localEntrega});
+  const ConfirmarPedidoView({super.key, required this.localEntrega});
 
   @override
-  State<OrderConfirmView> createState() => _OrderConfirmViewState();
+  State<ConfirmarPedidoView> createState() => _ConfirmarPedidoViewState();
 }
 
-class _OrderConfirmViewState extends State<OrderConfirmView> {
+class _ConfirmarPedidoViewState extends State<ConfirmarPedidoView> {
   late LocalEntrega _localEntrega;
   late Future<Map<String, dynamic>> _futureUser;
+
+  bool _enviando = false;
 
   @override
   void initState() {
     super.initState();
     _localEntrega = widget.localEntrega;
     _futureUser = AuthService.getMe();
+  }
+
+  Future<void> _confirmarPedido() async {
+    final state = CarrinhoService.state;
+
+    if (state.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Seu carrinho está vazio. Adicione itens antes de confirmar.',
+          ),
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _enviando = true;
+    });
+
+    try {
+      // cria o pedido no backend a partir do carrinho
+      final Pedido pedido = await PedidoService.criarPedidoFromCart(
+        localEntrega: _localEntrega,
+      );
+
+      // limpa o carrinho após criar o pedido com sucesso
+      CarrinhoService.clear();
+
+      if (!mounted) return;
+
+      // navega para tela de pedido confirmado, já com o pedido criado
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => PedidoConfirmadoView(pedido: pedido)),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Erro ao confirmar pedido: $e')));
+    } finally {
+      if (mounted) {
+        setState(() {
+          _enviando = false;
+        });
+      }
+    }
   }
 
   @override
@@ -185,7 +235,7 @@ class _OrderConfirmViewState extends State<OrderConfirmView> {
                           ),
                           const SizedBox(height: 8),
 
-                          // endereço entrega + botão editar
+                          // local de entrega + botão editar
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -194,7 +244,7 @@ class _OrderConfirmViewState extends State<OrderConfirmView> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      'Endereço de Entrega:',
+                                      'Local de Entrega:',
                                       style: GoogleFonts.inter(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w600,
@@ -230,7 +280,7 @@ class _OrderConfirmViewState extends State<OrderConfirmView> {
                                         context,
                                         MaterialPageRoute(
                                           builder: (_) =>
-                                              const DeliveryLocationView(),
+                                              const LocalEntregaView(),
                                         ),
                                       );
                                   if (novoLocal != null && mounted) {
@@ -337,32 +387,7 @@ class _OrderConfirmViewState extends State<OrderConfirmView> {
                   width: double.infinity,
                   height: 48,
                   child: ElevatedButton(
-                    onPressed: () async {
-                      try {
-                        // cria o pedido a partir do carrinho
-                        await PedidoService.criarPedidoFromCart(
-                          localEntrega: _localEntrega,
-                        );
-
-                        // limpa o carrinho
-                        CarrinhoService.clear();
-
-                        // vai para a tela de "Pedido Confirmado" (splash)
-                        if (!mounted) return;
-
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(
-                            builder: (_) => const PedidoConfirmadoView(),
-                          ),
-                        );
-                      } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Erro ao confirmar pedido: $e'),
-                          ),
-                        );
-                      }
-                    },
+                    onPressed: _enviando ? null : _confirmarPedido,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: TColor.primary,
                       foregroundColor: Colors.white,
@@ -374,7 +399,18 @@ class _OrderConfirmViewState extends State<OrderConfirmView> {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    child: const Text('Confirmar Pedido'),
+                    child: _enviando
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                            ),
+                          )
+                        : const Text('Confirmar Pedido'),
                   ),
                 ),
               ],

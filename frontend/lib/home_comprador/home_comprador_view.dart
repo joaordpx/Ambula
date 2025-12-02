@@ -13,8 +13,8 @@ import 'package:frontend/home_comprador/sections/lojas_populares_section.dart';
 import 'package:frontend/home_comprador/sections/disponiveis_agora_section.dart';
 import 'package:frontend/view/store_detail_view.dart';
 import 'package:frontend/view/main_tab_view.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:frontend/view/carrinho_view.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class HomeCompradorView extends StatefulWidget {
   const HomeCompradorView({super.key});
@@ -24,28 +24,22 @@ class HomeCompradorView extends StatefulWidget {
 }
 
 class _HomeCompradorViewState extends State<HomeCompradorView> {
-  late Future<HomeData> _future;
+  late Future<HomeData> _futureHome;
 
   @override
   void initState() {
     super.initState();
-    _future = _loadAll();
+    _futureHome = _carregarHome();
   }
 
-  Future<HomeData> _loadAll() async {
-    final responses = await Future.wait([
-      AuthService.getMe(),
-      CategoriaProdutoService.fetchCategorias(),
-      MaisAmadosService.fetchMaisAmados(),
-      LojasPopularesService.fetchLojasPopulares(),
-      DisponiveisAgoraService.fetchDisponiveisAgora(),
-    ]);
-
-    final user = responses[0] as Map<String, dynamic>;
-    final categorias = responses[1] as List<CategoriaProduto>;
-    final maisAmados = responses[2] as List<Map<String, dynamic>>;
-    final lojasPopulares = responses[3] as List<Map<String, dynamic>>;
-    final disponiveisAgora = responses[4] as List<Map<String, dynamic>>;
+  Future<HomeData> _carregarHome() async {
+    final user = await AuthService.getMe();
+    final List<CategoriaProduto> categorias =
+        await CategoriaProdutoService.fetchCategorias();
+    final maisAmados = await MaisAmadosService.fetchMaisAmados();
+    final lojasPopulares = await LojasPopularesService.fetchLojasPopulares();
+    final disponiveisAgora =
+        await DisponiveisAgoraService.fetchDisponiveisAgora();
 
     return HomeData(
       user: user,
@@ -56,13 +50,19 @@ class _HomeCompradorViewState extends State<HomeCompradorView> {
     );
   }
 
+  void _abrirLoja(int lojaId) {
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => StoreDetailView(lojaId: lojaId)));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: TColor.background,
       body: SafeArea(
         child: FutureBuilder<HomeData>(
-          future: _future,
+          future: _futureHome,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
@@ -70,10 +70,13 @@ class _HomeCompradorViewState extends State<HomeCompradorView> {
 
             if (snapshot.hasError) {
               return Center(
-                child: Text(
-                  "Não foi possível carregar a página.\n${snapshot.error}",
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.inter(),
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Text(
+                    "Não foi possível carregar a página.\n${snapshot.error}",
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.inter(),
+                  ),
                 ),
               );
             }
@@ -123,50 +126,22 @@ class _HomeCompradorViewState extends State<HomeCompradorView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                "Olá, $firstName",
-                style: GoogleFonts.inter(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                ),
-              ),
               const SizedBox(height: 14),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Row(
                     children: [
-                      Container(
-                        width: 42,
-                        height: 42,
-                        decoration: BoxDecoration(
-                          color: TColor.primary.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Icon(
-                          Icons.location_on_outlined,
-                          size: 28,
-                          color: TColor.primary,
-                        ),
-                      ),
                       const SizedBox(width: 10),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "Localização Atual",
+                            "Olá, $firstName",
                             style: GoogleFonts.inter(
-                              fontSize: 14,
-                              color: TColor.secondarytext,
-                            ),
-                          ),
-                          Text(
-                            "Prédio 3 - CCET",
-                            style: GoogleFonts.inter(
-                              fontSize: 16,
+                              fontSize: 18,
                               fontWeight: FontWeight.w600,
-                              color: TColor.primarytext,
+                              color: Colors.black87,
                             ),
                           ),
                         ],
@@ -187,7 +162,7 @@ class _HomeCompradorViewState extends State<HomeCompradorView> {
           ),
         ),
 
-        // body scroll
+        // body
         Expanded(
           child: SingleChildScrollView(
             padding: const EdgeInsets.only(bottom: 20),
@@ -199,10 +174,9 @@ class _HomeCompradorViewState extends State<HomeCompradorView> {
                 // categorias
                 CategoriasSection(
                   categorias: categorias,
-                  onVerMais: () {
-                    // navegação pra tela de "todas as categorias" (futuro)
-                  },
+                  onVerMais: null,
                   onCategoriaTap: (categoria) {
+                    // 👉 Troca para a aba de busca mantendo a bottom nav
                     MainTabView.of(
                       context,
                     )?.openSearchWithTerm(categoria.descricao);
@@ -214,8 +188,12 @@ class _HomeCompradorViewState extends State<HomeCompradorView> {
                 // mais amados do campus
                 MaisAmadosSection(
                   produtos: maisAmados,
-                  onVerMais: () {
-                    // navegar pra listagem completa dos produtos em destaque
+                  onVerMais: null,
+                  onProdutoTap: (produto) {
+                    final lojaId = produto['lojaId'] as int?;
+                    if (lojaId != null) {
+                      _abrirLoja(lojaId);
+                    }
                   },
                 ),
 
@@ -224,42 +202,23 @@ class _HomeCompradorViewState extends State<HomeCompradorView> {
                 // lojas mais populares
                 LojasPopularesSection(
                   lojas: lojasPopulares,
-                  onVerMais: () {
-                    // navegar pra listagem de lojas
-                  },
-                  onLojaTap: (lojaId) {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => StoreDetailView(lojaId: lojaId),
-                      ),
-                    );
-                  },
+                  onVerMais: null,
+                  onLojaTap: _abrirLoja,
                 ),
 
                 const SizedBox(height: 20),
 
-                // disp agora
+                // disponíveis agora (lojas abertas)
                 DisponiveisAgoraSection(
-                  produtos: disponiveisAgora,
-                  onVerMais: () {
-                    // navegar pra listagem de lojas disponíveis
-                  },
+                  lojas: disponiveisAgora,
+                  onVerMais: null,
+                  onLojaTap: _abrirLoja,
                 ),
               ],
             ),
           ),
         ),
       ],
-    );
-  }
-
-  Widget _placeholder(String label) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 18),
-      child: Text(
-        label,
-        style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600),
-      ),
     );
   }
 }

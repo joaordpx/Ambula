@@ -21,6 +21,12 @@ class _PerfilCompradorViewState extends State<PerfilCompradorView> {
     _futureUser = AuthService.getMe();
   }
 
+  void _reloadUser() {
+    setState(() {
+      _futureUser = AuthService.getMe();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -50,7 +56,9 @@ class _PerfilCompradorViewState extends State<PerfilCompradorView> {
                     String email = '-';
                     String telefone = '-';
 
-                    if (snapshot.hasError) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      nome = 'Carregando...';
+                    } else if (snapshot.hasError) {
                       nome = 'Não foi possível carregar';
                     } else if (snapshot.hasData) {
                       final user = snapshot.data!;
@@ -70,16 +78,27 @@ class _PerfilCompradorViewState extends State<PerfilCompradorView> {
                               children: [
                                 InkWell(
                                   onTap: snapshot.hasData
-                                      ? () {
-                                          Navigator.of(context).push(
-                                            MaterialPageRoute(
-                                              builder: (_) => EditarContaView(
-                                                nomeInicial: nome,
-                                                email: email,
-                                                telefoneInicial: telefone,
-                                              ),
-                                            ),
-                                          );
+                                      ? () async {
+                                          // abre tela de edição
+                                          final updated =
+                                              await Navigator.of(
+                                                context,
+                                              ).push<bool>(
+                                                MaterialPageRoute(
+                                                  builder: (_) =>
+                                                      EditarContaView(
+                                                        nomeInicial: nome,
+                                                        email: email,
+                                                        telefoneInicial:
+                                                            telefone,
+                                                      ),
+                                                ),
+                                              );
+
+                                          // se a edição retornou true, recarrega os dados do usuário
+                                          if (updated == true) {
+                                            _reloadUser();
+                                          }
                                         }
                                       : null,
                                   child: Padding(

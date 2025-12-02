@@ -4,17 +4,19 @@ import 'package:frontend/models/local_entrega.dart';
 import 'package:frontend/services/local_entrega_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class DeliveryLocationView extends StatefulWidget {
-  const DeliveryLocationView({super.key});
+class LocalEntregaView extends StatefulWidget {
+  const LocalEntregaView({super.key});
 
   @override
-  State<DeliveryLocationView> createState() => _DeliveryLocationViewState();
+  State<LocalEntregaView> createState() => _LocalEntregaViewState();
 }
 
-class _DeliveryLocationViewState extends State<DeliveryLocationView> {
+class _LocalEntregaViewState extends State<LocalEntregaView> {
   int? _selectedLocalId;
-
   late Future<List<LocalEntrega>> _futureLocais;
+
+  // cache local da lista carregada
+  List<LocalEntrega> _locais = [];
 
   @override
   void initState() {
@@ -30,9 +32,15 @@ class _DeliveryLocationViewState extends State<DeliveryLocationView> {
       return;
     }
 
-    final local = LocalEntregaService.getById(_selectedLocalId!);
+    try {
+      final local = _locais.firstWhere((l) => l.id == _selectedLocalId);
 
-    Navigator.of(context).pop(local);
+      Navigator.of(context).pop(local);
+    } catch (_) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Erro ao recuperar o local selecionado.")),
+      );
+    }
   }
 
   @override
@@ -59,20 +67,29 @@ class _DeliveryLocationViewState extends State<DeliveryLocationView> {
             return const Center(child: CircularProgressIndicator());
           }
 
+          if (snapshot.hasError) {
+            return Center(
+              child: Text(
+                'Erro ao carregar locais:\n${snapshot.error}',
+                textAlign: TextAlign.center,
+              ),
+            );
+          }
+
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text("Nenhum local disponível."));
           }
 
-          final locais = snapshot.data!;
+          _locais = snapshot.data!;
 
           return Column(
             children: [
               Expanded(
                 child: ListView.builder(
                   padding: const EdgeInsets.all(16),
-                  itemCount: locais.length,
+                  itemCount: _locais.length,
                   itemBuilder: (context, index) {
-                    final local = locais[index];
+                    final local = _locais[index];
 
                     return Container(
                       margin: const EdgeInsets.only(bottom: 12),

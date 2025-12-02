@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/common/color_extension.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:frontend/services/auth_service.dart';
 
 class EditarContaView extends StatefulWidget {
   final String nomeInicial;
@@ -21,6 +22,7 @@ class EditarContaView extends StatefulWidget {
 class _EditarContaViewState extends State<EditarContaView> {
   late TextEditingController _nomeController;
   late TextEditingController _telefoneController;
+  late TextEditingController _emailController;
 
   bool _salvando = false;
 
@@ -29,6 +31,7 @@ class _EditarContaViewState extends State<EditarContaView> {
     super.initState();
     _nomeController = TextEditingController(text: widget.nomeInicial);
     _telefoneController = TextEditingController(text: widget.telefoneInicial);
+    _emailController = TextEditingController(text: widget.email);
   }
 
   @override
@@ -41,6 +44,7 @@ class _EditarContaViewState extends State<EditarContaView> {
   Future<void> _salvar() async {
     final nome = _nomeController.text.trim();
     final telefone = _telefoneController.text.trim();
+    final email = _emailController.text.trim();
 
     if (nome.isEmpty) {
       ScaffoldMessenger.of(
@@ -49,20 +53,58 @@ class _EditarContaViewState extends State<EditarContaView> {
       return;
     }
 
+    if (telefone.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Informe o telefone.')));
+      return;
+    }
+
+    if (email.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Informe o e-mail.')));
+      return;
+    }
+
+    if (!email.contains('@')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Informe um e-mail válido.')),
+      );
+      return;
+    }
+
     setState(() => _salvando = true);
 
-    // aqui entra chamada ao back (PUT /me ou similar)
-    await Future.delayed(const Duration(milliseconds: 500));
+    try {
+      final result = await AuthService.updateProfile(
+        name: nome,
+        telefone: telefone,
+        email: email,
+      );
 
-    if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            (result['message'] as String?) ?? 'Dados atualizados com sucesso.',
+          ),
+        ),
+      );
 
-    setState(() => _salvando = false);
+      if (!mounted) return;
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Dados atualizados (mock).')));
+      Navigator.of(context).pop(true);
+    } catch (e) {
+      if (!mounted) return;
 
-    Navigator.of(context).pop();
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
+    } finally {
+      if (mounted) {
+        setState(() => _salvando = false);
+      }
+    }
   }
 
   @override
@@ -140,7 +182,7 @@ class _EditarContaViewState extends State<EditarContaView> {
             const SizedBox(height: 20),
 
             Text(
-              'E-mail (não editável por enquanto)',
+              'E-mail',
               style: GoogleFonts.inter(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
@@ -149,11 +191,11 @@ class _EditarContaViewState extends State<EditarContaView> {
             ),
             const SizedBox(height: 4),
             TextField(
-              controller: TextEditingController(text: widget.email),
-              enabled: false,
+              controller: _emailController,
+              keyboardType: TextInputType.emailAddress,
               decoration: InputDecoration(
                 filled: true,
-                fillColor: const Color(0xFFEDEEF3),
+                fillColor: const Color(0xFFF6F7FB),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
                   borderSide: BorderSide.none,
