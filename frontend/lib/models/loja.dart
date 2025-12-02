@@ -16,13 +16,23 @@ class Loja {
   });
 
   factory Loja.fromJson(Map<String, dynamic> json) {
+    final dynamic status = json['status'];
+    final dynamic statusAberta = json['statusAberta'];
+
+    final bool disponivel =
+        (statusAberta is bool && statusAberta) ||
+        (status is bool && status) ||
+        (status is String && status.toString().toLowerCase() == 'aberta');
+
     return Loja(
-      id: json['id'],
-      nome: json['nome'],
-      header: json['header'] ?? '',
-      descricao: json['descricao'] ?? '',
-      avaliacao: (json['avaliacao'] ?? 0).toDouble(),
-      disponivelAgora: json['status'] == 'aberta',
+      id: (json['id'] as num).toInt(),
+      nome: (json['nome'] ?? '') as String,
+      header: (json['header'] ?? json['imagem'] ?? '') as String,
+      descricao: (json['descricao'] ?? '') as String,
+      avaliacao: json['avaliacao'] is num
+          ? (json['avaliacao'] as num).toDouble()
+          : double.tryParse(json['avaliacao']?.toString() ?? '0') ?? 0.0,
+      disponivelAgora: disponivel,
     );
   }
 }

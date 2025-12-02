@@ -16,13 +16,20 @@ class Produto {
   });
 
   factory Produto.fromJson(Map<String, dynamic> json) {
+    final dynamic precoRaw = json['preco'] ?? json['valor'] ?? 0;
+    final double preco = precoRaw is num
+        ? precoRaw.toDouble()
+        : double.tryParse(precoRaw.toString()) ?? 0.0;
+
+    final dynamic lojaIdRaw = json['loja_id'] ?? json['lojaId'] ?? 0;
+
     return Produto(
-      id: json['id'],
-      lojaId: json['loja_id'] as int,
-      nome: json['nome'],
-      descricao: json['descricao'] ?? '',
-      preco: (json['preco'] ?? 0).toDouble(),
-      imagem: json['imagem'] ?? '',
+      id: (json['id'] as num).toInt(),
+      lojaId: (lojaIdRaw as num).toInt(),
+      nome: (json['nome'] ?? '') as String,
+      descricao: (json['descricao'] ?? '') as String,
+      preco: preco,
+      imagem: (json['imagem'] ?? '') as String,
     );
   }
 }

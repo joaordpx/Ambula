@@ -1,4 +1,4 @@
-/// model categoria de produto
+/// Modelo de categoria usado na tela de busca/descoberta.
 class CategoriaProduto {
   final int? id;
   final String descricao;
@@ -7,11 +7,13 @@ class CategoriaProduto {
   const CategoriaProduto({this.id, required this.descricao, this.imagem});
 }
 
-/// modelo de loja usado na busca e na seção "Lojas mais bem avaliadas".
+/// Modelo de loja usado na busca e na seção "Lojas mais bem avaliadas".
 class Loja {
   final int id;
   final String nome;
   final String categoria;
+
+  /// Texto pronto pra exibição (ex: "Aberto agora", "Fechado no momento").
   final String status;
   final String descricao;
   final double avaliacao;
@@ -26,9 +28,27 @@ class Loja {
     required this.avaliacao,
     this.imagem,
   });
+
+  factory Loja.fromJson(Map<String, dynamic> json) {
+    final bool aberta =
+        (json['statusAberta'] as bool?) ?? (json['status'] == true);
+    final statusTexto = aberta ? 'Aberto agora' : 'Fechado no momento';
+
+    return Loja(
+      id: (json['id'] as num).toInt(),
+      nome: (json['nome'] ?? '') as String,
+      categoria: (json['categoria'] ?? '') as String,
+      status: statusTexto,
+      descricao: (json['descricao'] ?? '') as String,
+      avaliacao: (json['avaliacao'] is num)
+          ? (json['avaliacao'] as num).toDouble()
+          : double.tryParse(json['avaliacao']?.toString() ?? '0') ?? 0.0,
+      imagem: json['imagem'] as String?,
+    );
+  }
 }
 
-/// modelo de produto para os resultados da busca
+/// Modelo de produto retornado na busca.
 class Produto {
   final int id;
   final int lojaId;
@@ -36,7 +56,6 @@ class Produto {
   final double valor;
   final String lojaNome;
   final double lojaAvaliacao;
-  final String? imagem;
 
   const Produto({
     required this.id,
@@ -45,11 +64,25 @@ class Produto {
     required this.valor,
     required this.lojaNome,
     required this.lojaAvaliacao,
-    this.imagem,
   });
+
+  factory Produto.fromJson(Map<String, dynamic> json) {
+    return Produto(
+      id: (json['id'] as num).toInt(),
+      lojaId: (json['lojaId'] as num).toInt(),
+      nome: (json['nome'] ?? '') as String,
+      valor: (json['valor'] is num)
+          ? (json['valor'] as num).toDouble()
+          : double.tryParse(json['valor']?.toString() ?? '0') ?? 0.0,
+      lojaNome: (json['lojaNome'] ?? '') as String,
+      lojaAvaliacao: (json['lojaAvaliacao'] is num)
+          ? (json['lojaAvaliacao'] as num).toDouble()
+          : double.tryParse(json['lojaAvaliacao']?.toString() ?? '0') ?? 0.0,
+    );
+  }
 }
 
-/// dados usados no modo "explorar" da tela de busca
+/// Dados do modo "descoberta" da tela de busca.
 class DadosDescoberta {
   final List<CategoriaProduto> categorias;
   final List<Loja> lojasMaisBemAvaliadas;
@@ -60,7 +93,7 @@ class DadosDescoberta {
   });
 }
 
-/// resultado da busca (produtos + lojas)
+/// Resultado da busca (produtos + lojas).
 class ResultadoBusca {
   final List<Produto> produtos;
   final List<Loja> lojas;
