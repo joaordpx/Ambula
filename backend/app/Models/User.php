@@ -24,7 +24,6 @@ class User extends Authenticatable
         'password',
         'telefone',
         'cpf',
-        'localizacao_id',
         'nivel',
     ];
 
@@ -51,8 +50,4 @@ class User extends Authenticatable
     /**
      * Relacionamento com a Localizacao.
      */
-    public function localizacao(): BelongsTo
-    {
-        return $this->belongsTo(Localizacao::class);
-    }
 }

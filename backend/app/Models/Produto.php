@@ -24,9 +24,14 @@ class Produto extends Model
         'valor' => 'decimal:2',
     ];
 
-    
+
     public function categoria(): BelongsTo
     {
         return $this->belongsTo(CategoriaProduto::class, 'categoria_produto_id');
+    }
+
+    public function estoques()
+    {
+        return $this->hasMany(Estoque::class);
     }
 }

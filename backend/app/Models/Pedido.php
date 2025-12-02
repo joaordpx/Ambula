@@ -16,6 +16,7 @@ class Pedido extends Model
     protected $fillable = [
         'user_id',
         'status_pedido_id',
+        'localizacao_id',
         'loja_id',
         'pagamento',
     ];
@@ -24,7 +25,7 @@ class Pedido extends Model
         'pagamento' => 'boolean',
     ];
 
-    
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -43,5 +44,10 @@ class Pedido extends Model
     public function itens(): HasMany
     {
         return $this->hasMany(ItensPedido::class);
+    }
+
+    public function localizacao(): BelongsTo
+    {
+        return $this->belongsTo(Localizacao::class);
     }
 }

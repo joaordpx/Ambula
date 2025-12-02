@@ -15,7 +15,7 @@ class Localizacao extends Model
         'descricao',
     ];
 
-    public function users()
+    public function pedidos()
     {
         return $this->hasMany(User::class);
     }
