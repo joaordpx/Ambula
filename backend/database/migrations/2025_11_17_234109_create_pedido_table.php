@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Localizacao;
 use App\Models\Loja;
 use App\Models\StatusPedido;
 use App\Models\User;
@@ -18,6 +19,7 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(User::class);
             $table->foreignIdFor(StatusPedido::class);
+            $table->foreignIdFor(Localizacao::class)->nullable();
             $table->foreignIdFor(Loja::class);
             $table->boolean('pagamento');
             $table->timestamps();

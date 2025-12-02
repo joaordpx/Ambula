@@ -8,16 +8,14 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    
+
     public function up(): void
     {
         Schema::create('itens_pedidos', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(Pedido::class)->constrained()->onDelete('cascade');
-            $table->foreignIdFor(Produto::class)->constrained(); 
+            $table->foreignIdFor(Produto::class)->constrained();
             $table->integer('quantidade');
-            $table->decimal('preco_unitario', 8, 2);
-            $table->decimal('subtotal', 8, 2);
             $table->timestamps();
         });
     }

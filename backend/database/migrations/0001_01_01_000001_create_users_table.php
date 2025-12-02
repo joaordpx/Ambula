@@ -20,7 +20,6 @@ return new class extends Migration
             $table->string('password');
             $table->string('telefone');
             $table->string('cpf')->unique();
-            $table->foreignIdFor(Localizacao::class)->nullable();
             $table->tinyInteger('nivel');
             $table->rememberToken();
             $table->timestamps();

@@ -13,7 +13,10 @@ return new class extends Migration
     {
         Schema::create('localizacao', function (Blueprint $table) {
             $table->id();
+            $table->string('nome');
             $table->string('descricao');
+            $table->string('latitude')->nullable();
+            $table->string('longitude')->nullable();
             $table->timestamps();
         });
     }
