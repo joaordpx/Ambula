@@ -1,42 +1,80 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
 import 'package:frontend/models/local_entrega.dart';
 
 class LocalEntregaService {
-  static final List<LocalEntrega> _locais = [
-    LocalEntrega(
-      id: 1,
-      nome: "Entrada do Prédio 3 - CCET",
-      descricao: "Entrada principal do CCET, próxima ao estacionamento.",
-      latitude: -16.7280000,
-      longitude: -43.8610000,
-    ),
-    LocalEntrega(
-      id: 2,
-      nome: "Entrada do Prédio 2 - CCH",
-      descricao: "Ao lado da cantina do CCH.",
-      latitude: -16.7275000,
-      longitude: -43.8605000,
-    ),
-    LocalEntrega(
-      id: 3,
-      nome: "Praça de Alimentação",
-      descricao: "Ponto central da universidade, próximo aos quiosques.",
-      latitude: -16.7278000,
-      longitude: -43.8613000,
-    ),
-  ];
+  // Ajuste essa URL de acordo com o que você está usando no projeto
+  static const String _baseUrl = 'http://10.0.2.2:8000/api';
+  // static const String _baseUrl = 'http://localhost/Ambula/backend/public/api';
 
-  /// simula requisição que retorna todos os locais de entrega.
+  /// Cache simples em memória para permitir getById()
+  static final Map<int, LocalEntrega> _cacheById = {};
+
+  /// Busca todos os locais de entrega da API (/api/localizacoes)
   static Future<List<LocalEntrega>> listarLocais() async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    return _locais;
+    final uri = Uri.parse('$_baseUrl/localizacoes');
+
+    final response = await http.get(
+      uri,
+      headers: const {'Accept': 'application/json'},
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception(
+        'Falha ao carregar locais de entrega (HTTP ${response.statusCode})',
+      );
+    }
+
+    final dynamic body = jsonDecode(response.body);
+
+    // A API pode retornar diretamente um array ou algo do tipo { data: [...] }
+    List<dynamic> rawList;
+    if (body is List) {
+      rawList = body;
+    } else if (body is Map<String, dynamic> && body['data'] is List) {
+      rawList = body['data'] as List;
+    } else if (body is Map<String, dynamic> && body['localizacoes'] is List) {
+      rawList = body['localizacoes'] as List;
+    } else {
+      throw Exception('Formato inesperado ao listar locais de entrega.');
+    }
+
+    final locais = <LocalEntrega>[];
+
+    for (final item in rawList) {
+      if (item is! Map) continue;
+      final map = item as Map<String, dynamic>;
+
+      final id = (map['id'] as num).toInt();
+      final descricao = (map['descricao'] ?? '').toString();
+
+      // Como a tabela só tem "descricao", usamos:
+      // - nome: descricao
+      // - descricao: descricao
+      // - latitude/longitude: 0.0 (não usados atualmente)
+      final local = LocalEntrega(
+        id: id,
+        nome: descricao,
+        descricao: descricao,
+        latitude: 0.0,
+        longitude: 0.0,
+      );
+
+      locais.add(local);
+    }
+
+    // atualiza cache para getById()
+    _cacheById
+      ..clear()
+      ..addEntries(locais.map((l) => MapEntry(l.id, l)));
+
+    return locais;
   }
 
-  /// Busca um local específico pelo ID (útil na tela de resumo do pedido).
+  /// Busca um local no cache pelo ID.
+  /// Depende de `listarLocais()` ter sido chamado antes.
   static LocalEntrega? getById(int id) {
-    try {
-      return _locais.firstWhere((l) => l.id == id);
-    } catch (_) {
-      return null;
-    }
+    return _cacheById[id];
   }
 }

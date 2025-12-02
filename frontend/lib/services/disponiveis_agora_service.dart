@@ -1,44 +1,27 @@
 import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class DisponiveisAgoraService {
+  static const String _baseUrl = 'http://10.0.2.2:8000/api';
+
   static Future<List<Map<String, dynamic>>> fetchDisponiveisAgora() async {
-    await Future.delayed(const Duration(milliseconds: 400));
+    final url = Uri.parse('$_baseUrl/home/disponiveis-agora');
 
-    const mockJson = '''
-    [
-      {
-        "id": 1,
-        "nome": "Cookie Caseiro",
-        "imagem": "https://picsum.photos/300",
-        "ambulante": {
-          "nome": "Maria doces",
-          "foto": "https://i.pravatar.cc/150?img=12"
-        },
-        "status_loja": "aberto"
-      },
-      {
-        "id": 2,
-        "nome": "Brownie Tradicional",
-        "imagem": "https://picsum.photos/301",
-        "ambulante": {
-          "nome": "Doces do João",
-          "foto": "https://i.pravatar.cc/150?img=24"
-        },
-        "status_loja": "aberto"
-      },
-      {
-        "id": 3,
-        "nome": "Café Gelado",
-        "imagem": "https://picsum.photos/302",
-        "ambulante": {
-          "nome": "Café da Lu",
-          "foto": "https://i.pravatar.cc/150?img=35"
-        },
-        "status_loja": "aberto"
+    final response = await http.get(
+      url,
+      headers: const {'Accept': 'application/json'},
+    );
+
+    if (response.statusCode == 200) {
+      final body = jsonDecode(response.body);
+      if (body is List) {
+        return body.map((e) => Map<String, dynamic>.from(e as Map)).toList();
       }
-    ]
-    ''';
-
-    return List<Map<String, dynamic>>.from(jsonDecode(mockJson));
+      throw Exception('Resposta inesperada em /home/disponiveis-agora.');
+    } else {
+      throw Exception(
+        'Falha ao carregar disponíveis agora (${response.statusCode}).',
+      );
+    }
   }
 }

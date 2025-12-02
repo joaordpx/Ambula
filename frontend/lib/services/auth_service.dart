@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class AuthService {
-  // static const String _baseUrl = 'http://10.0.2.2:8000/api';
-  static const String _baseUrl = 'http://localhost/Ambula/backend/public/api';
+  static const String _baseUrl = 'http://10.0.2.2:8000/api';
+  //static const String _baseUrl = 'http://localhost/Ambula/backend/public/api';
   // se usando php embutido (php -S 127.0.0.1:9000 -t public),
   // trocar linha acima por:
   // static const String _baseUrl = 'http://127.0.0.1:9000/api';
@@ -21,6 +21,7 @@ class AuthService {
     required String name,
     required String email,
     required String password,
+    required String passwordConfirmation,
     required String telefone,
     required String cpf,
     required int nivel,
@@ -37,9 +38,11 @@ class AuthService {
         'name': name,
         'email': email,
         'password': password,
+        'password_confirmation':
+            passwordConfirmation, // <- precisa por causa do "confirmed"
         'telefone': telefone,
         'cpf': cpf,
-        'nivel': nivel,
+        'nivel': nivel, // <- continua mandando o nível
       }),
     );
 
@@ -139,6 +142,48 @@ class AuthService {
       throw Exception(
         'Erro ao carregar dados do usuário (${response.statusCode}).',
       );
+    }
+  }
+
+  //update profile
+  static Future<Map<String, dynamic>> updateProfile({
+    required String name,
+    required String telefone,
+    required String email,
+  }) async {
+    if (_token == null) {
+      throw Exception('Usuário não autenticado (token ausente).');
+    }
+
+    final url = Uri.parse('$_baseUrl/me');
+
+    final response = await http.put(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $_token',
+      },
+      body: jsonEncode({'name': name, 'telefone': telefone, 'email': email}),
+    );
+
+    print('UPDATE PROFILE STATUS: ${response.statusCode}');
+    print('UPDATE PROFILE BODY: ${response.body}');
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data is Map<String, dynamic>) {
+        return data;
+      }
+      throw Exception('Resposta inesperada da API ao atualizar perfil.');
+    } else {
+      try {
+        final body = jsonDecode(response.body);
+        if (body is Map && body['message'] != null) {
+          throw Exception(body['message'].toString());
+        }
+      } catch (_) {}
+      throw Exception('Falha ao atualizar perfil. Tente novamente.');
     }
   }
 

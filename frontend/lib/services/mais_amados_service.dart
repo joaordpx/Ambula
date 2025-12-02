@@ -1,29 +1,27 @@
-import 'dart:async';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class MaisAmadosService {
-  /// GET /api/home/mais-amados (ou algo assim).
-  static Future<List<Map<String, dynamic>>> fetchMaisAmados() async {
-    await Future.delayed(const Duration(milliseconds: 400));
+  static const String _baseUrl = 'http://10.0.2.2:8000/api';
 
-    return [
-      {
-        'id': 1,
-        'nomeProduto': 'Cookie de Chocolate',
-        'nomeAmbulante': 'Nena Snacks',
-        'lojaAberta': true,
-      },
-      {
-        'id': 2,
-        'nomeProduto': 'Brownie da Casa',
-        'nomeAmbulante': 'Doces do João',
-        'lojaAberta': false,
-      },
-      {
-        'id': 3,
-        'nomeProduto': 'Suco Natural',
-        'nomeAmbulante': 'Ambulante da Bio',
-        'lojaAberta': true,
-      },
-    ];
+  static Future<List<Map<String, dynamic>>> fetchMaisAmados() async {
+    final url = Uri.parse('$_baseUrl/home/mais-amados');
+
+    final response = await http.get(
+      url,
+      headers: const {'Accept': 'application/json'},
+    );
+
+    if (response.statusCode == 200) {
+      final body = jsonDecode(response.body);
+      if (body is List) {
+        return body.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+      }
+      throw Exception('Resposta inesperada em /home/mais-amados.');
+    } else {
+      throw Exception(
+        'Falha ao carregar mais amados (${response.statusCode}).',
+      );
+    }
   }
 }

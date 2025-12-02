@@ -34,10 +34,16 @@ class CarrinhoService {
 
   static CartState get state => _state;
 
+  /// Limpa completamente o carrinho (loja + itens).
   static void clear() {
     _state.lojaId = null;
     _state.lojaNome = null;
     _state.itens.clear();
+  }
+
+  /// Alias em português para ser usado no PedidoService.
+  static void limpar() {
+    clear();
   }
 
   static void removeItem(int produtoId) {
@@ -62,7 +68,7 @@ class CarrinhoService {
     }
   }
 
-  /// só itens de uma loja por vez
+  /// Garante que o carrinho possui itens de **uma única loja**.
   static Future<void> addItemWithSingleStoreRule(
     BuildContext context, {
     required int lojaId,

@@ -1,70 +1,50 @@
-import 'dart:async';
+import 'dart:convert';
+
 import 'package:frontend/models/loja.dart';
 import 'package:frontend/models/produto.dart';
 import 'package:frontend/models/loja_detalhe.dart';
+import 'package:http/http.dart' as http;
 
 class LojaService {
   LojaService();
 
-  Future<LojaDetalhe> getDetalhesLoja(int lojaId) async {
-    await Future.delayed(const Duration(milliseconds: 600));
+  static const String _baseUrl = 'http://10.0.2.2:8000/api';
 
-    final loja = Loja(
-      id: lojaId,
-      nome: 'Delícia de Cookie',
-      header:
-          'https://images.pexels.com/photos/230325/pexels-photo-230325.jpeg',
-      descricao:
-          'Oi! Eu sou apaixonado por transformar momentos simples em pequenos prazeres doces. '
-          'No Delícia de Cookie, preparo cookies fresquinhos todos os dias, com ingredientes selecionados '
-          'e muito carinho para adoçar sua rotina no campus.',
-      avaliacao: 4.8,
-      disponivelAgora: true,
+  Future<LojaDetalhe> getDetalhesLoja(int lojaId) async {
+    final uri = Uri.parse('$_baseUrl/lojas/$lojaId');
+
+    final response = await http.get(
+      uri,
+      headers: const {'Accept': 'application/json'},
     );
 
-    final produtos = <Produto>[
-      Produto(
-        id: 1,
-        lojaId: 10,
-        nome: 'Chocolate com Gotas de Chocolate ao Leite',
-        descricao:
-            'Um clássico irresistível! Massa macia, muitas gotas de chocolate ao leite e aquele cheirinho que toma conta do corredor.',
-        preco: 6.50,
-        imagem:
-            'https://images.pexels.com/photos/230325/pexels-photo-230325.jpeg',
-      ),
-      Produto(
-        id: 2,
-        lojaId: 20,
-        nome: 'Cookie de Doce de Leite com Flor de Sal',
-        descricao:
-            'Equilíbrio perfeito entre o doce de leite cremoso e o toque de flor de sal. Ideal pra acompanhar um café.',
-        preco: 7.00,
-        imagem:
-            'https://images.pexels.com/photos/230325/pexels-photo-230325.jpeg',
-      ),
-      Produto(
-        id: 3,
-        lojaId: 30,
-        nome: 'Cookie de Nutella Recheado',
-        descricao:
-            'Casquinha crocante por fora, coração cremoso de Nutella por dentro. Servido levemente aquecido.',
-        preco: 8.00,
-        imagem:
-            'https://images.pexels.com/photos/230325/pexels-photo-230325.jpeg',
-      ),
-      Produto(
-        id: 4,
-        lojaId: 40,
-        nome: 'Combo 4 Cookies Sortidos',
-        descricao:
-            'Escolha seus sabores favoritos e monte seu combo pra dividir (ou não) com os amigos.',
-        preco: 24.00,
-        imagem:
-            'https://images.pexels.com/photos/230325/pexels-photo-230325.jpeg',
-      ),
-    ];
+    if (response.statusCode == 200) {
+      final body = jsonDecode(response.body);
 
-    return LojaDetalhe(loja: loja, produtos: produtos);
+      if (body is! Map<String, dynamic>) {
+        throw Exception('Resposta inesperada ao carregar detalhes da loja.');
+      }
+
+      final lojaJson = Map<String, dynamic>.from(
+        (body['loja'] ?? const <String, dynamic>{}) as Map,
+      );
+      final produtosJson = body['produtos'];
+
+      final loja = Loja.fromJson(lojaJson);
+
+      final produtos = (produtosJson is List)
+          ? produtosJson
+                .map((e) => Produto.fromJson(Map<String, dynamic>.from(e)))
+                .toList()
+          : <Produto>[];
+
+      return LojaDetalhe(loja: loja, produtos: produtos);
+    } else if (response.statusCode == 404) {
+      throw Exception('Loja não encontrada.');
+    } else {
+      throw Exception(
+        'Falha ao carregar detalhes da loja (${response.statusCode}).',
+      );
+    }
   }
 }

@@ -1,17 +1,28 @@
-import 'dart:async';
+import 'dart:convert';
 import 'package:frontend/models/categoria_produto.dart';
+import 'package:http/http.dart' as http;
 
 class CategoriaProdutoService {
-  ///GET /api/categorias-produto
+  static const String _baseUrl = 'http://10.0.2.2:8000/api';
+
   static Future<List<CategoriaProduto>> fetchCategorias() async {
-    await Future.delayed(const Duration(milliseconds: 500));
-    return const [
-      CategoriaProduto(id: 1, descricao: 'Bebidas'),
-      CategoriaProduto(id: 2, descricao: 'Salgados'),
-      CategoriaProduto(id: 3, descricao: 'Sobremesas'),
-      CategoriaProduto(id: 4, descricao: 'Promoções'),
-      CategoriaProduto(id: 5, descricao: 'Lanches'),
-      CategoriaProduto(id: 6, descricao: 'Café'),
-    ];
+    final url = Uri.parse('$_baseUrl/categorias-produto');
+
+    final response = await http.get(
+      url,
+      headers: const {'Accept': 'application/json'},
+    );
+
+    if (response.statusCode == 200) {
+      final body = jsonDecode(response.body);
+      if (body is List) {
+        return body
+            .map((e) => CategoriaProduto.fromJson(e as Map<String, dynamic>))
+            .toList();
+      }
+      throw Exception('Resposta inesperada ao carregar categorias.');
+    } else {
+      throw Exception('Falha ao carregar categorias (${response.statusCode}).');
+    }
   }
 }
