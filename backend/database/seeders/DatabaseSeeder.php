@@ -60,5 +60,19 @@ class DatabaseSeeder extends Seeder
         foreach ($categorias as $descricao) {
             CategoriaProduto::create(['descricao' => $descricao]);
         }
+
+        $status = [
+            'emAndamento',
+            'entregue',
+            'cancelado',
+            'pronto',
+            'emPreparo',
+            'novo',
+
+        ];
+
+        foreach ($categorias as $descricao) {
+            CategoriaProduto::create(['descricao' => $descricao]);
+        }
     }
 }

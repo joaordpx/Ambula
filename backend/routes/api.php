@@ -35,6 +35,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::put('pedidos/{id}/status', [PedidoController::class, 'updateStatus']);
 
+    Route::get('/lojas/{id}/pedidos', [PedidoController::class, 'pedidosDaLoja']);
+    Route::patch('/pedidos/{id}/status', [PedidoController::class, 'alterarStatus']);
+
 
     Route::get('/user', function (Request $request) {
         return $request->user();

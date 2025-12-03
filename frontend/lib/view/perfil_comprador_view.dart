@@ -272,9 +272,9 @@ class _PerfilCompradorViewState extends State<PerfilCompradorView> {
           height: 40,
           child: ElevatedButton(
             onPressed: () {
-              //Navigator.of(context).push(
-              //  MaterialPageRoute(builder: (_) => const CriarLojaView()),
-              // );
+              Navigator.of(
+                context,
+              ).push(MaterialPageRoute(builder: (_) => const CriarLojaView()));
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: TColor.primary,

@@ -1,183 +1,162 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/common/color_extension.dart';
+import 'package:frontend/models/pedido.dart';
+import 'package:frontend/services/pedido_service.dart';
+import 'package:frontend/view/config_loja_view.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class HomeVendedorView extends StatelessWidget {
-  const HomeVendedorView({super.key});
+class HomeVendedorView extends StatefulWidget {
+  final int? lojaId;
+  final String? lojaNome;
+
+  const HomeVendedorView({super.key, this.lojaId, this.lojaNome});
+
+  @override
+  State<HomeVendedorView> createState() => _HomeVendedorViewState();
+}
+
+class _HomeVendedorViewState extends State<HomeVendedorView> {
+  int get _lojaIdExibicao => widget.lojaId ?? 1;
+
+  @override
+  void initState() {
+    super.initState();
+
+    PedidoService.carregarPedidosDaLoja(_lojaIdExibicao).then((_) {
+      setState(() {});
+    });
+  }
+
+  String get _lojaNomeExibicao =>
+      widget.lojaNome?.isNotEmpty == true ? widget.lojaNome! : "Minha Loja";
 
   @override
   Widget build(BuildContext context) {
-    final media = MediaQuery.of(context).size;
+    final novos = PedidoService.pedidosNovosDaLoja(_lojaIdExibicao);
+    final emPreparo = PedidoService.pedidosEmPreparoDaLoja(_lojaIdExibicao);
+    final prontos = PedidoService.pedidosProntosDaLoja(_lojaIdExibicao);
 
-    return Scaffold(
-      backgroundColor: TColor.background,
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        backgroundColor: TColor.background,
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          titleSpacing: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            color: TColor.primarytext,
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Painel do vendedor',
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  color: TColor.secondarytext,
+                ),
+              ),
+              Text(
+                _lojaNomeExibicao,
+                style: GoogleFonts.inter(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: TColor.primarytext,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.storefront_outlined),
+              color: TColor.primarytext,
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => ConfigLojaView(lojaId: _lojaIdExibicao),
+                  ),
+                );
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.history),
+              color: TColor.primarytext,
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'Histórico de pedidos do vendedor ainda não implementado.',
+                    ),
+                  ),
+                );
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.logout),
+              color: TColor.primarytext,
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        ),
+        body: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+              decoration: BoxDecoration(
+                color: TColor.primary,
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(20),
+                  bottomRight: Radius.circular(20),
+                ),
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Painel do vendedor",
+                    'Resumo de hoje',
                     style: GoogleFonts.inter(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: TColor.primarytext,
+                      fontSize: 14,
+                      color: Colors.white.withOpacity(0.9),
                     ),
                   ),
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      CircleAvatar(
-                        radius: 18,
-                        backgroundColor: TColor.primary.withOpacity(0.15),
-                        child: Icon(
-                          Icons.storefront_rounded,
-                          color: TColor.primary,
-                          size: 20,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Nome da Loja",
-                            style: GoogleFonts.inter(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: TColor.primarytext,
-                            ),
-                          ),
-                          Text(
-                            "Status: Aberta",
-                            style: GoogleFonts.inter(
-                              fontSize: 12,
-                              color: Colors.green[600],
-                            ),
-                          ),
-                        ],
-                      ),
+                      _buildHeaderStat('Novos', novos.length),
+                      const SizedBox(width: 8),
+                      _buildHeaderStat('Em preparo', emPreparo.length),
+                      const SizedBox(width: 8),
+                      _buildHeaderStat('Prontos', prontos.length),
                     ],
                   ),
                 ],
               ),
             ),
-
-            const Divider(height: 1),
-
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 16,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Resumo de hoje",
-                      style: GoogleFonts.inter(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: TColor.primarytext,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        _InfoCard(
-                          title: "Pedidos",
-                          value: "12",
-                          subtitle: "em andamento",
-                        ),
-                        const SizedBox(width: 12),
-                        _InfoCard(
-                          title: "Faturamento",
-                          value: "R\$ 230,00",
-                          subtitle: "hoje",
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 24),
-                    Text(
-                      "Atalhos rápidos",
-                      style: GoogleFonts.inter(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: TColor.primarytext,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    _ShortcutTile(
-                      icon: Icons.receipt_long_rounded,
-                      title: "Ver pedidos em tempo real",
-                      subtitle:
-                          "Acompanhe os pedidos que estão chegando agora.",
-                    ),
-                    const SizedBox(height: 12),
-                    _ShortcutTile(
-                      icon: Icons.fastfood_rounded,
-                      title: "Gerenciar cardápio",
-                      subtitle:
-                          "Adicione, edite ou pause produtos do seu cardápio.",
-                    ),
-                    const SizedBox(height: 12),
-                    _ShortcutTile(
-                      icon: Icons.schedule_rounded,
-                      title: "Horário de funcionamento",
-                      subtitle:
-                          "Ajuste os horários em que sua loja fica aberta.",
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    Center(
-                      child: Text(
-                        "Tela do vendedor em construção.\n\n"
-                        "Depois aqui vamos conectar com:\n"
-                        "• Lista de pedidos\n"
-                        "• Cadastro/edição de produtos\n"
-                        "• Configurações da loja.",
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.inter(
-                          fontSize: 13,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            const SizedBox(height: 12),
+            TabBar(
+              labelColor: TColor.primarytext,
+              unselectedLabelColor: TColor.secondarytext,
+              indicatorColor: TColor.primary,
+              tabs: [
+                _tab('Novos', novos.length, Colors.blue),
+                _tab('Em preparo', emPreparo.length, Colors.orange),
+                _tab('Prontos', prontos.length, Colors.green),
+              ],
             ),
 
-            Container(
-              width: media.width,
-              height: 64,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border(
-                  top: BorderSide(
-                    color: Colors.grey.withOpacity(0.2),
-                    width: 1,
-                  ),
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: const [
-                  _NavItem(
-                    icon: Icons.home_filled,
-                    label: "Início",
-                    isActive: true,
-                  ),
-                  _NavItem(icon: Icons.receipt_long_outlined, label: "Pedidos"),
-                  _NavItem(icon: Icons.fastfood_outlined, label: "Produtos"),
-                  _NavItem(icon: Icons.person_outline, label: "Perfil"),
+            const SizedBox(height: 8),
+            Expanded(
+              child: TabBarView(
+                children: [
+                  _buildListaPedidos(novos, 'Nenhum pedido novo.'),
+                  _buildListaPedidos(emPreparo, 'Nada em preparo.'),
+                  _buildListaPedidos(prontos, 'Nenhum pedido pronto.'),
                 ],
               ),
             ),
@@ -186,159 +165,186 @@ class HomeVendedorView extends StatelessWidget {
       ),
     );
   }
-}
 
-class _InfoCard extends StatelessWidget {
-  final String title;
-  final String value;
-  final String subtitle;
+  Tab _tab(String label, int count, Color color) {
+    return Tab(
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(label),
+          const SizedBox(width: 6),
+          CircleAvatar(
+            radius: 10,
+            backgroundColor: color.withOpacity(0.12),
+            child: Text(
+              '$count',
+              style: GoogleFonts.inter(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: color,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-  const _InfoCard({
-    required this.title,
-    required this.value,
-    required this.subtitle,
-  });
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildHeaderStat(String label, int value) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-              color: Colors.black.withOpacity(0.04),
-            ),
-          ],
+          color: Colors.white.withOpacity(0.12),
+          borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              title,
-              style: GoogleFonts.inter(fontSize: 12, color: Colors.grey[600]),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              value,
+              label,
               style: GoogleFonts.inter(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: TColor.primarytext,
+                fontSize: 13,
+                color: Colors.white.withOpacity(0.9),
               ),
             ),
             const SizedBox(height: 4),
             Text(
-              subtitle,
-              style: GoogleFonts.inter(fontSize: 11, color: Colors.grey[500]),
+              '$value',
+              style: GoogleFonts.inter(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
             ),
           ],
         ),
       ),
     );
   }
-}
 
-class _ShortcutTile extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
+  Widget _buildListaPedidos(List<Pedido> list, String emptyText) {
+    if (list.isEmpty) {
+      return Center(
+        child: Text(
+          emptyText,
+          style: GoogleFonts.inter(fontSize: 14, color: TColor.secondarytext),
+        ),
+      );
+    }
 
-  const _ShortcutTile({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-  });
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+      itemCount: list.length,
+      itemBuilder: (_, index) => _buildPedidoCard(list[index]),
+    );
+  }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildPedidoCard(Pedido pedido) {
+    final itensResumo = pedido.itens
+        .map((e) => '${e.quantidade}x ${e.nomeProduto}')
+        .join(', ');
+
+    final hora =
+        '${pedido.criadoEm.hour.toString().padLeft(2, '0')}:${pedido.criadoEm.minute.toString().padLeft(2, '0')}';
+
+    List<Widget> actions;
+
+    switch (pedido.status) {
+      case PedidoStatus.novo:
+        actions = [
+          ElevatedButton(
+            onPressed: () async {
+              await PedidoService.moverParaEmPreparo(pedido.id);
+              setState(() {});
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: TColor.primary),
+            child: const Text('Iniciar preparo'),
+          ),
+          TextButton(
+            onPressed: () async {
+              await PedidoService.cancelarPedido(pedido.id);
+              setState(() {});
+            },
+            child: Text('Cancelar', style: TextStyle(color: TColor.accent)),
+          ),
+        ];
+        break;
+
+      case PedidoStatus.emPreparo:
+        actions = [
+          ElevatedButton(
+            onPressed: () async {
+              await PedidoService.moverParaPronto(pedido.id);
+              setState(() {});
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+            child: const Text('Marcar como pronto'),
+          ),
+        ];
+        break;
+
+      case PedidoStatus.pronto:
+        actions = [
+          ElevatedButton(
+            onPressed: () async {
+              await PedidoService.moverParaEntregue(pedido.id);
+              setState(() {});
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+            child: const Text('Marcar como entregue'),
+          ),
+        ];
+        break;
+
+      default:
+        actions = [];
+    }
+
     return Container(
+      margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
+            color: Colors.black.withOpacity(0.06),
             blurRadius: 10,
             offset: const Offset(0, 4),
-            color: Colors.black.withOpacity(0.04),
           ),
         ],
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: TColor.primary.withOpacity(0.12),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, size: 22, color: TColor.primary),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
+          Row(
+            children: [
+              const CircleAvatar(radius: 18, child: Icon(Icons.person)),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Cliente',
                   style: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: TColor.primarytext,
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  subtitle,
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ],
-            ),
+              ),
+              Text(hora, style: GoogleFonts.inter(fontSize: 12)),
+            ],
           ),
+          const SizedBox(height: 8),
+          Text(itensResumo),
+          const SizedBox(height: 6),
+          Text(
+            'Total: R\$ ${pedido.total.toStringAsFixed(2)}',
+            style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 10),
+          if (actions.isNotEmpty) Row(children: actions),
         ],
       ),
-    );
-  }
-}
-
-class _NavItem extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool isActive;
-
-  const _NavItem({
-    required this.icon,
-    required this.label,
-    this.isActive = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final color = isActive ? TColor.primary : Colors.grey[500];
-
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(icon, size: 22, color: color),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: GoogleFonts.inter(
-            fontSize: 11,
-            fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
-            color: color,
-          ),
-        ),
-      ],
     );
   }
 }

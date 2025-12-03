@@ -25,6 +25,28 @@ class Pedido extends Model
         'pagamento' => 'boolean',
     ];
 
+    public function toArrayResponse()
+    {
+        return [
+            'id' => $this->id,
+            'loja_id' => $this->loja_id,
+            'loja_nome' => $this->loja->nome ?? null,
+            'status' => $this->status,
+            'total' => $this->valor_total,
+            'created_at' => $this->created_at,
+            'cliente_nome' => $this->user->name ?? null,
+            'cliente_telefone' => $this->user->telefone ?? null,
+            'local_entrega' => $this->localEntrega->nome ?? null,
+            'itens' => $this->itens->map(function ($i) {
+                return [
+                    'nome' => $i->produto->nome,
+                    'quantidade' => $i->quantidade
+                ];
+            })
+        ];
+    }
+
+
 
     public function user(): BelongsTo
     {

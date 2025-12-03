@@ -1,84 +1,59 @@
 import 'dart:convert';
-
+import 'package:frontend/services/auth_service.dart';
 import 'package:frontend/models/produto.dart';
 import 'package:http/http.dart' as http;
 
 class ProdutoService {
   static const String _baseUrl = 'http://10.0.2.2:8000/api';
 
-  /// Lista produtos com filtros opcionais:
-  /// - categoriaId
-  /// - termo de busca
-  static Future<List<Produto>> listar({int? categoriaId, String? termo}) async {
-    final queryParams = <String, String>{};
+  static String? get _token => AuthService.token;
 
-    if (categoriaId != null) {
-      queryParams['categoria_id'] = categoriaId.toString();
-    }
-    if (termo != null && termo.trim().isNotEmpty) {
-      queryParams['q'] = termo.trim();
-    }
-
-    final uri = Uri.parse(
-      '$_baseUrl/produtos',
-    ).replace(queryParameters: queryParams.isEmpty ? null : queryParams);
-
-    final response = await http.get(
-      uri,
-      headers: const {'Accept': 'application/json'},
-    );
-
-    if (response.statusCode == 200) {
-      final body = jsonDecode(response.body);
-
-      if (body is List) {
-        return body
-            .map((e) => Produto.fromJson(Map<String, dynamic>.from(e)))
-            .toList();
-      }
-
-      throw Exception('Resposta inesperada ao listar produtos.');
-    } else {
-      throw Exception('Falha ao listar produtos (${response.statusCode}).');
-    }
+  static Map<String, String> _headers() {
+    return {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${_token!}',
+    };
   }
 
-  /// Busca detalhes de um produto, opcionalmente com loja_id.
-  static Future<Produto> obterPorId({
-    required int produtoId,
-    int? lojaId,
-  }) async {
-    final uri = Uri.parse('$_baseUrl/produtos/$produtoId').replace(
-      queryParameters: lojaId != null ? {'loja_id': lojaId.toString()} : null,
+  static Future<Produto> criar(Produto p) async {
+    final resp = await http.post(
+      Uri.parse('$_baseUrl/produtos'),
+      headers: _headers(),
+      body: jsonEncode(p.toJson()),
     );
 
-    final response = await http.get(
-      uri,
-      headers: const {'Accept': 'application/json'},
-    );
-
-    if (response.statusCode == 200) {
-      final body = jsonDecode(response.body);
-
-      if (body is Map<String, dynamic>) {
-        // o JSON vem no formato alinhado com Produto.fromJson
-        final map = <String, dynamic>{
-          'id': body['id'],
-          'loja_id': (body['lojaInfo']?['loja_id']) ?? 0,
-          'nome': body['nome'],
-          'descricao': body['descricao'],
-          'valor': body['valor'],
-          'imagem': body['imagem'],
-        };
-
-        return Produto.fromJson(map);
-      }
-
-      throw Exception('Resposta inesperada ao obter produto.');
-    } else if (response.statusCode == 404) {
-      throw Exception('Produto não encontrado.');
-    } else {
-      throw Exception('Falha ao carregar produto (${response.statusCode}).');
+    if (resp.statusCode == 201) {
+      final json = jsonDecode(resp.body);
+      return Produto.fromJson(json);
     }
+
+    throw Exception('Erro ao criar produto: ${resp.body}');
+  }
+
+  static Future<Produto> atualizar(int id, Produto p) async {
+    final resp = await http.put(
+      Uri.parse('$_baseUrl/produtos/$id'),
+      headers: _headers(),
+      body: jsonEncode(p.toJson()),
+    );
+
+    if (resp.statusCode == 200) {
+      final json = jsonDecode(resp.body);
+      return Produto.fromJson(json);
+    }
+
+    throw Exception('Erro ao atualizar produto: ${resp.body}');
+  }
+
+  static Future<void> remover(int id) async {
+    final resp = await http.delete(
+      Uri.parse('$_baseUrl/produtos/$id'),
+      headers: _headers(),
+    );
+
+    if (resp.statusCode == 200) return;
+
+    throw Exception('Erro ao deletar produto: ${resp.body}');
   }
 }

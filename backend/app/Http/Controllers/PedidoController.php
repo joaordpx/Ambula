@@ -139,4 +139,33 @@ class PedidoController extends Controller
             ], 500);
         }
     }
+
+    public function pedidosDaLoja($lojaId)
+    {
+        $pedidos = Pedido::where('loja_id', $lojaId)
+            ->with(['itens.produto', 'localEntrega'])
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($p) {
+                return $p->toArrayResponse();
+            });
+
+        return response()->json(['pedidos' => $pedidos]);
+    }
+
+    public function alterarStatus(Request $request, $pedidoId)
+    {
+        $request->validate([
+            'status' => 'required|string'
+        ]);
+
+        $pedido = Pedido::findOrFail($pedidoId);
+
+        $pedido->status = $request->status;
+        $pedido->save();
+
+        return response()->json([
+            'message' => 'Status atualizado com sucesso.'
+        ]);
+    }
 }

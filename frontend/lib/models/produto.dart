@@ -5,6 +5,8 @@ class Produto {
   final String descricao;
   final double preco;
   final String imagem;
+  final String? categoria; // texto da categoria
+  final int? categoriaId; // usado no PUT/POST
 
   Produto({
     required this.id,
@@ -13,23 +15,39 @@ class Produto {
     required this.descricao,
     required this.preco,
     required this.imagem,
+    this.categoria,
+    this.categoriaId,
   });
 
   factory Produto.fromJson(Map<String, dynamic> json) {
-    final dynamic precoRaw = json['preco'] ?? json['valor'] ?? 0;
-    final double preco = precoRaw is num
-        ? precoRaw.toDouble()
-        : double.tryParse(precoRaw.toString()) ?? 0.0;
+    // backend usa "valor"
+    final precoRaw = json['preco'] ?? json['valor'] ?? 0;
 
-    final dynamic lojaIdRaw = json['loja_id'] ?? json['lojaId'] ?? 0;
+    // loja_id pode ser 0 (quando vem do ProdutoController)
+    final lojaIdRaw = json['loja_id'] ?? json['lojaId'] ?? 0;
 
     return Produto(
       id: (json['id'] as num).toInt(),
-      lojaId: (lojaIdRaw as num).toInt(),
-      nome: (json['nome'] ?? '') as String,
-      descricao: (json['descricao'] ?? '') as String,
-      preco: preco,
-      imagem: (json['imagem'] ?? '') as String,
+      lojaId: (lojaIdRaw is num) ? lojaIdRaw.toInt() : 0,
+      nome: json['nome']?.toString() ?? '',
+      descricao: json['descricao']?.toString() ?? '',
+      preco: precoRaw is num
+          ? precoRaw.toDouble()
+          : double.tryParse(precoRaw.toString()) ?? 0.0,
+      imagem: json['imagem']?.toString() ?? '',
+      categoria: json['categoria']?.toString(),
+      categoriaId: json['categoria_produto_id'] as int?,
     );
+  }
+
+  /// usado ao enviar para PUT/POST
+  Map<String, dynamic> toJson() {
+    return {
+      'nome': nome,
+      'descricao': descricao,
+      'valor': preco,
+      'categoria_produto_id': categoriaId,
+      'imagem': imagem,
+    };
   }
 }

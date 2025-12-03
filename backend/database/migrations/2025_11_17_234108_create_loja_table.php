@@ -20,7 +20,6 @@ return new class extends Migration
             $table->string('header')->nullable();
             $table->boolean('status');
             $table->decimal('avaliacao')->default(0)->nullable();
-            $table->foreignIdFor(Localizacao::class)->nullable();
             $table->foreignIdFor(User::class);
             $table->timestamps();
         });

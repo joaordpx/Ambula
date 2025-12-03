@@ -34,7 +34,6 @@ class LojaController extends Controller
                 'avaliacao' => (float) $loja->avaliacao,
                 'status'    => (bool) $loja->status,
                 'imagem'    => $loja->imagem,
-                // campo "header" pro app usar como banner
                 'header'    => $loja->imagem,
             ];
         });
@@ -49,7 +48,7 @@ class LojaController extends Controller
     public function show(int $id): JsonResponse
     {
         $loja = Loja::query()
-            ->with(['user', 'localizacao'])
+            ->with(['user'])
             ->find($id);
 
         if (!$loja) {
@@ -116,7 +115,6 @@ class LojaController extends Controller
             'nome'           => ['required', 'string', 'max:255'],
             'descricao'      => ['nullable', 'string'],
             'header'         => ['nullable', 'string', 'max:255'],
-            'localizacao_id' => ['required', 'integer', 'exists:localizacao,id'],
         ]);
 
         $loja = Loja::create([
@@ -126,7 +124,6 @@ class LojaController extends Controller
             'header'         => $data['header'] ?? null,
             'status'         => true,
             'avaliacao'      => 0,
-            'localizacao_id' => $data['localizacao_id'],
         ]);
 
         return response()->json([
@@ -150,7 +147,7 @@ class LojaController extends Controller
     }
 
     /**
-     * Atualiza loja (somente dono ou admin nivel 9).
+     * Atualiza loja (somente dono ).
      */
     public function update(Request $request, int $id): JsonResponse
     {
@@ -160,10 +157,6 @@ class LojaController extends Controller
             return response()->json(['message' => 'Loja não encontrada.'], 404);
         }
 
-        $user = $request->user();
-        if ($loja->user_id !== $user->id && $user->nivel < 9) {
-            return response()->json(['message' => 'Acesso negado.'], 403);
-        }
 
         try {
             $data = $request->validate([
@@ -172,7 +165,6 @@ class LojaController extends Controller
                 'imagem'         => 'sometimes|nullable|string|max:255',
                 'avaliacao'      => 'sometimes|numeric|min:0|max:5',
                 'status'         => 'sometimes|boolean',
-                'localizacao_id' => 'sometimes|nullable|exists:localizacao,id',
             ]);
 
             $loja->update($data);

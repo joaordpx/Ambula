@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/models/local_entrega.dart';
+import 'package:frontend/common/color_extension.dart'; // ← NECESSÁRIO para TColor
 
 /// Status possíveis de um pedido na visão do app.
-enum PedidoStatus { emAndamento, entregue, cancelado }
+enum PedidoStatus { emAndamento, entregue, cancelado, novo, emPreparo, pronto }
 
 /// Item individual dentro de um pedido (nome + quantidade).
 class PedidoItem {
@@ -12,7 +13,7 @@ class PedidoItem {
   const PedidoItem({required this.nomeProduto, required this.quantidade});
 }
 
-/// Modelo de Pedido usado no front (mock por enquanto).
+/// Modelo de Pedido usado no front.
 class Pedido {
   final int id;
   final String lojaNome;
@@ -34,27 +35,45 @@ class Pedido {
     this.localEntrega,
   });
 
-  /// Texto amigável para exibir o status na UI.
+  /// Texto visível do status
   String get statusTexto {
     switch (status) {
-      case PedidoStatus.emAndamento:
-        return 'Em andamento';
+      case PedidoStatus.novo:
+        return 'Novo';
+      case PedidoStatus.emPreparo:
+        return 'Em preparo';
+      case PedidoStatus.pronto:
+        return 'Pronto para retirada';
       case PedidoStatus.entregue:
         return 'Entregue';
       case PedidoStatus.cancelado:
         return 'Cancelado';
+      case PedidoStatus.emAndamento:
+        return 'Em andamento';
     }
   }
 
-  /// Helper pra cor do status, mantendo o padrão que você já estava usando.
+  /// Cor exibida para o status
   Color statusColor(Color primary, Color accent) {
     switch (status) {
-      case PedidoStatus.emAndamento:
-        return Colors.orange;
-      case PedidoStatus.entregue:
+      case PedidoStatus.novo:
         return primary;
+      case PedidoStatus.emPreparo:
+        return Colors.orange;
+      case PedidoStatus.pronto:
+        return primary;
+      case PedidoStatus.entregue:
+        return TColor.primary;
       case PedidoStatus.cancelado:
         return accent;
+      case PedidoStatus.emAndamento:
+        return Colors.blue; // fallback – você pode trocar se quiser
     }
   }
+
+  /// Do ponto de vista do COMPRADOR, “em andamento”
+  bool get isEmAndamentoComprador =>
+      status == PedidoStatus.novo ||
+      status == PedidoStatus.emPreparo ||
+      status == PedidoStatus.pronto;
 }

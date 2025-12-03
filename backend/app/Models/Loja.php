@@ -20,7 +20,6 @@ class Loja extends Model
         'header',
         'avaliacao',
         'status',
-        'localizacao_id',
         'user_id',
     ];
 
@@ -32,11 +31,6 @@ class Loja extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
-    }
-
-    public function localizacao(): BelongsTo
-    {
-        return $this->belongsTo(Localizacao::class);
     }
 
     public function estoques(): HasMany

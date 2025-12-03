@@ -38,6 +38,12 @@ class _PedidoConfirmadoViewState extends State<PedidoConfirmadoView> {
         return 'Entregue';
       case PedidoStatus.cancelado:
         return 'Cancelado';
+      case PedidoStatus.novo:
+        return 'Novo';
+      case PedidoStatus.emPreparo:
+        return 'Em preparo';
+      case PedidoStatus.pronto:
+        return 'Pronto para retirada';
     }
   }
 
